@@ -20,7 +20,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <v-app-bar :elevation="scrolled ? 4 : 0" app color="primary" dark>
+    <v-app-bar :elevation="scrolled ? 4 : 0" app color="#2563eb" dark>
         <v-toolbar-title>Nyumba Yangu</v-toolbar-title>
         <v-spacer></v-spacer>
         <div v-if="auth.isLoggedIn">
