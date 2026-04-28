@@ -7,7 +7,7 @@ import Navbar from './components/Navbar.vue';
 <template>
   <v-app>
     <Navbar />
-    <v-main>
+    <v-main class="main-content" :style="{ marginTop: '70px' }">
       <RouterView />
     </v-main>
   </v-app>
