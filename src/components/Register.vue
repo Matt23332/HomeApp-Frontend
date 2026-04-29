@@ -112,9 +112,9 @@ const handleSubmit = async () => {
     
     // Redirect based on role
     if (user.role === 'Admin') {
-      router.push('/admin/dashboard');
+      router.push('/admin');
     } else {
-      router.push('/dashboard');
+      router.push('/login');
     }
   } catch (err) {
     console.error('Registration error:', err);
