@@ -3,9 +3,11 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
 
 const form = reactive({
     'email': '',
@@ -45,15 +47,18 @@ const handleLogin = async () => {
     serverError.value = '';
 
     try {
-        const response = await api.post('/login', {
+        const { data } = await api.post('/login', {
             email: form.email,
             password: form.password,
-            rememberMe: rememberMe.value,
         });
 
-        const { token, user, redirect_url } = response.data;
-        localStorage.setItem('access_token', token);
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        auth.setToken(data.access_token);
+        auth.setUser(data.user);
+
+        api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
 
         if (rememberMe.value) {
             localStorage.setItem('rememberedEmail', form.email);
@@ -61,25 +66,19 @@ const handleLogin = async () => {
             localStorage.removeItem('rememberedEmail');
         }
 
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        console.log('Login successful: ', response.data);
-        const redirectPath = redirect_url || (user.role === 'Admin' ? '/admin' : '/dashboard');
-        setTimeout(() => {
-            router.push(redirectPath);
-        }, 1000);
+        const redirectPath = data.redirect_url || (data.user?.role === 'Admin' ? '/admin' : '/dashboard');
+        await router.push(redirectPath);
     } catch (error) {
-        console.error('Login error: ', error);
-
-        if (error.response) {
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors || {};        
+        } else if (error.response?.status === 401) {
             serverError.value = 'Invalid email or password. Please try again.';
-        } else if (error.response?.status === 422) {
-            errors.value = error.response.data.errors || {};
         } else if (error.response?.status === 403) {
-            serverError.value = 'Your account is inactive. Kindly activate it to continue.';
+            serverError.value = 'Your account is inactive. Please contact support.';
         } else if (error.response?.status === 429) {
-            serverError.value = 'Too many login attempts. Try again later.';
+            serverError.value = 'Too many login attempts. Please try again later.';
         } else {
-            serverError.value = error.response?.data?.message || 'Login failed. Please try again.';
+            serverError.value = error.response?.data?.message || 'An unexpected error occurred. Please try again later.';
         }
     } finally {
         loading.value = false;
