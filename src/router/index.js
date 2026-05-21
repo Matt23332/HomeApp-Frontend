@@ -12,6 +12,7 @@ import Bills from '@/components/Bills.vue'
 import ShoppingItems from '@/components/ShoppingItems.vue'
 import Admin from '@/components/Admin.vue'
 import ForgotPassword from '@/components/ForgotPassword.vue'
+import Setting from '@/components/Setting.vue'
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -26,6 +27,7 @@ const routes = [
   { path: '/shopping-items', name: 'ShoppingItems', component: ShoppingItems },
   { path: '/admin', name: 'Admin', component: Admin, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword },
+  { path: '/setting', name: 'Setting', component: Setting },
 ]
 
 const router = createRouter({
