@@ -554,6 +554,7 @@ onUnmounted(() => {
 }
 
 .user-menu {
+    display: block;
     min-width: 260px;
 }
 
