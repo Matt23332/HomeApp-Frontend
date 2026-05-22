@@ -98,8 +98,11 @@ const closeMobileMenu = () => {
     document.body.style.overflow = '';
 }
 
-const toggleUserMenu = () => {
+const toggleUserMenu = (event) => {
+    event?.stopPropagation();
+    console.log('Toggle called, current value:', userMenuOpen.value);
     userMenuOpen.value = !userMenuOpen.value;
+    console.log('new value after toggle:', userMenuOpen.value);
     notificationsOpen.value = false;
 }
 
@@ -162,6 +165,8 @@ const vClickOutside = {
 
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleScroll);
+    console.log('Navbar mounted');
 });
 
 onUnmounted(() => {
@@ -226,7 +231,7 @@ onUnmounted(() => {
                     </div>
 
                     <div class="dropdown user-dropdown" v-click-outside="closeUserMenu">
-                        <button class="user-menu-btn" @click="toggleUserMenu" :class="{ 'menu-active': userMenuOpen }">
+                        <button class="user-menu-btn" @click.stop="toggleUserMenu" :class="{ 'menu-active': userMenuOpen }">
                             <div class="user-avatar" :style="{ backgroundColor: userAvatarColor }">
                                 <span v-if="user">{{ getInitials(user.name) }}</span>
                                 <span v-else class="icon">👤</span>
