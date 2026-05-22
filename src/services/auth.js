@@ -33,7 +33,7 @@ export function useAuth() {
 
             console.log(user.value)
 
-            localStorage.setItem("authToken", token);
+            localStorage.setItem("auth_token", token);
             localStorage.setItem("user", JSON.stringify(user.value));
             localStorage.setItem("isAdmin", isAdmin);
 
@@ -59,7 +59,7 @@ export function useAuth() {
              const { token, user: userData } = response.data
             if (token && userData) {
                 user.value = userData
-                localStorage.setItem("authToken", token);
+                localStorage.setItem("auth_token", token);
                 localStorage.setItem("user", JSON.stringify(user));
 
                 return response
@@ -77,7 +77,7 @@ export function useAuth() {
     // Logout
     function logout() {
         user.value = null
-        localStorage.removeItem("authToken");
+        localStorage.removeItem("auth_token");
         localStorage.removeItem("user");
         localStorage.removeItem("isAdmin");
     }
