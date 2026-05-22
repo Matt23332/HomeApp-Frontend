@@ -99,7 +99,9 @@ const closeMobileMenu = () => {
 }
 
 const toggleUserMenu = () => {
+    console.log('toggle called, current value:', userMenuOpen.value);
     userMenuOpen.value = !userMenuOpen.value;
+    console.log('new value after toggle:', userMenuOpen.value);
     notificationsOpen.value = false;
 }
 
@@ -146,26 +148,26 @@ const handleLogout = async () => {
     router.push('/login');
 }
 
-const vClickOutside = {
-    mounted(el, binding) {
-        el.clickOutsideEvent = (event) => {
-            if (!(el === event.target || el.contains(event.target))) {
-                binding.value();
-            }
-        };
-        document.addEventListener('click', el.clickOutsideEvent);
-    },
-    unmounted(el) {
-        document.removeEventListener('click', el.clickOutsideEvent);
+const notificationDropdownRef = ref(null);
+const userDropdownRef = ref(null);
+
+const handleOutsideClick = (event) => {
+    if (notificationDropdownRef.value && !notificationDropdownRef.value.contains(event.target)) {
+        notificationsOpen.value = false;
+    }
+    if (userDropdownRef.value && !userDropdownRef.value.contains(event.target)) {
+        userMenuOpen.value = false;
     }
 }
 
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleOutsideClick);
 });
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
+    document.removeEventListener('mousedown', handleOutsideClick);
     document.body.style.overflow = '';
 });
 </script>
@@ -194,7 +196,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="navbar-user">
-                    <div class="dropdown notification-dropdown" v-click-outside="closeNotifications">
+                    <div class="dropdown notification-dropdown" ref="notificationDropdownRef">
                         <button class="user-action-btn" @click="toggleNotifications" :class="{ 'action-active': notificationsOpen }">
                             <span class="action-icon">🔔</span>
                             <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
@@ -210,12 +212,12 @@ onUnmounted(() => {
                                     <span class="empty-icon">🔕</span>
                                     <p>No new notifications</p>
                                 </div>
-                                <div v-for="notification in notifications" :key="notification.id" class="notification.item" :class="{ 'notification.unread': !notification.read }" @click="handleNotificationClick(notification)">
+                                <div v-for="notification in notifications" :key="notification.id" class="notification-item" :class="{ 'notification-unread': !notification.read }" @click="handleNotificationClick(notification)">
                                     <div class="notification-icon">{{ notification.icon }}</div>
                                     <div class="notification-content">
                                         <div class="notification-title">{{ notification.title }}</div>
                                         <div class="notification-message">{{ notification.message }}</div>
-                                        <div class="notification-time">{{ notification.created_at }}</div>
+                                        <div class="notification-time">{{ formatTime(notification.created_at) }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -225,7 +227,7 @@ onUnmounted(() => {
                         </div>
                     </div>
 
-                    <div class="dropdown user-dropdown" v-click-outside="closeUserMenu">
+                    <div class="dropdown user-dropdown" ref="userDropdownRef">
                         <button class="user-menu-btn" @click="toggleUserMenu" :class="{ 'menu-active': userMenuOpen }">
                             <div class="user-avatar" :style="{ backgroundColor: userAvatarColor }">
                                 <span v-if="user">{{ getInitials(user.name) }}</span>
@@ -256,7 +258,7 @@ onUnmounted(() => {
                                 <span class="item-text">My Profile</span>
                             </router-link>
 
-                            <router-link to="/setting" class="dropdown-item" @click="closeUserMenu">
+                            <router-link to="/settings" class="dropdown-item" @click="closeUserMenu">
                                 <span class="item-icon">⚙️</span>
                                 <span class="item-text">Settings</span>
                             </router-link>
@@ -546,19 +548,7 @@ onUnmounted(() => {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     min-width: 280px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
     z-index: 1000;
-}
-
-.user-menu-btn:focus + .dropdown-menu,
-.dropdown:hover .dropdown-menu,
-.dropdown-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
 }
 
 .user-menu {

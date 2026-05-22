@@ -13,6 +13,7 @@ import ShoppingItems from '@/components/ShoppingItems.vue'
 import Admin from '@/components/Admin.vue'
 import ForgotPassword from '@/components/ForgotPassword.vue'
 import Setting from '@/components/Setting.vue'
+import Notification from '@/components/Notification.vue'
 
 const routes = [
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -27,7 +28,8 @@ const routes = [
   { path: '/shopping-items', name: 'ShoppingItems', component: ShoppingItems },
   { path: '/admin', name: 'Admin', component: Admin, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword },
-  { path: '/setting', name: 'Setting', component: Setting },
+  { path: '/settings', name: 'Settings', component: Setting },
+  { path: '/notifications', name: 'Notifications', component: Notification },
 ]
 
 const router = createRouter({

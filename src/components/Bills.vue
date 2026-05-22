@@ -25,7 +25,7 @@
         <div class="summary-icon">💰</div>
         <div class="summary-info">
           <div class="summary-label">Total Amount</div>
-          <div class="summary-value">${{ totalAmount }}</div>
+          <div class="summary-value">KSH{{ totalAmount }}</div>
         </div>
       </div>
       <div class="summary-card">
@@ -104,14 +104,14 @@
         
         <div class="bill-body">
           <div class="bill-amount">
-            ${{ formatAmount(bill.amount) }}
+            KSH{{ formatAmount(bill.amount) }}
           </div>
           <div class="bill-due">
             <span class="label">Due Date:</span>
             <span class="value">{{ formatDate(bill.due_date) }}</span>
           </div>
           <div class="bill-status" :class="getStatusClass(bill.due_date)">
-            {{ getStatus(bill.due_date) }}
+            {{bill.status === 'paid' ? '✅ Paid' : getStatus(bill.due_date) }}
           </div>
           <div class="bill-progress" v-if="getDaysRemaining(bill.due_date) <= 7 && getDaysRemaining(bill.due_date) >= 0">
             <div class="progress-bar">
@@ -119,6 +119,12 @@
             </div>
             <div class="progress-text">{{ getDaysRemaining(bill.due_date) }} days remaining</div>
           </div>
+
+          <!--Mpesa Button-->
+          <button v-if="bill.status !== 'paid'" @click="openMpesaModal(bill)" class="btn btn-mpesa">
+            <span class="mpesa-logo">M</span> Pay with M-Pesa
+          </button>
+          <div v-else class="paid-badge">✅ Paid with M-Pesa</div>
         </div>
       </div>
     </div>
@@ -139,7 +145,7 @@
               id="title" 
               v-model="form.name" 
               required
-              placeholder="e.g., Netflix Subscription, Electricity Bill"
+              placeholder="e.g., Internet Bill, Electricity Bill"
               :class="{ 'error': errors.name }"
             />
             <span v-if="errors.name" class="error-message">{{ getErrorMessage(errors.name) }}</span>
@@ -148,7 +154,7 @@
           <div class="form-group">
             <label for="amount">Amount *</label>
             <div class="input-with-icon">
-              <span class="input-currency">$</span>
+              <span class="input-currency">KSH</span>
               <input 
                 type="number" 
                 id="amount" 
@@ -195,6 +201,87 @@
         </form>
       </div>
     </div>
+
+    <!-- M-Pesa Payment Modal -->
+     <div v-if="showMpesaModal" class="modal" @click.self="closeMpesaModal">
+      <div class="modal-content mpesa-modal">
+        <div class="modal-header mpesa-header">
+          <div class="mpesa-title-row">
+            <div class="mpesa-badge">M-Pesa</div>
+            <h2>Pay Bill: {{ billToPay ? getBillName(billToPay) : '' }}</h2>
+          </div>
+          <button class="close-btn" @click="closeMpesaModal" :disabled="mpesaStatus === 'pending'">&times;</button>
+        </div>
+
+        <!--Step 1: Enter phone number-->
+        <div v-if="mpesaStatus === 'idle'" class="mpesa-body">
+          <div class="mpesa-bill-summary">
+            <div class="mpesa-bill-name">{{ getBillName(mpesaBill) }}</div>
+            <div class="mpesa-bill-amount">KSH {{ formatAmount(mpesaBill.amount) }}</div>
+          </div>
+          <div class="form-group">
+            <label for="mpesa_phone">M-Pesa Phone Number</label>
+            <div class="input-with-icon">
+              <span class="input-currency">🇰🇪</span>
+              <input type="tel" id="mpesa_phone" v-model="mpesaPhone" placeholder="e.g. 07********" :class="{ 'error': mpesaPhoneError }" maxlength="13" />
+            </div>
+            <span v-if="mpesaPhoneError" class="error-message">{{ mpesaPhoneError }}</span>
+            <p class="mpesa-hint">You shall receive a push notification on this number to confirm payment.</p>
+          </div>
+          <div class="form-actions">
+            <button @click="closeMpesaModal" class="btn btn-secondary">Cancel</button>
+            <button @click="initiateMpesaPayment" class="btn btn-mpesa-submit" :disabled="!mpesaPhone">
+              <span class="mpesa-logo">M</span> Send STK Push
+            </button>
+          </div>
+        </div>
+
+        <!--Step 2: Waiting for payment confirmation-->
+        <div v-if="mpesaStatus === 'pending'" class="mpesa-body mpesa-waiting">
+          <div class="mpesa-spinner-wrap">
+            <div class="mpesa-spinner"></div>
+          </div>
+          <h3>Waiting for payment confirmation...</h3>
+          <p>Check your phone <strong>{{ mpesaPhone }}</strong> and enter your M-Pesa PIN to complete the payment.</p>
+          <div class="mpesa-amount-confirm">KSH {{ formatAmount(mpesaBill.amount) }}</div>
+          <p class="mpesa-hint">This will automatically update once the payment is confirmed.</p>
+        </div>
+
+        <!--Step 3: Payment success-->
+        <div v-if="mpesaStatus === 'success'" class="mpesa-body mpesa-result mpesa-success">
+          <div class="result-icon">✅</div>
+          <h3>Payment Successful!</h3>
+          <p>KSH {{ formatAmount(mpesaBill.amount) }} paid for <strong>{{ getBillName(mpesaBill) }}</strong>.</p>
+          <button @click="closeMpesaModal" class="btn btn-primary">Done</button>
+        </div>
+
+        <!--Step 4: Payment failed-->
+        <div v-if="mpesaStatus === 'failed'" class="mpesa-body mpesa-result mpesa-error">
+          <div class="result-icon">❌</div>
+          <h3>Payment Failed</h3>
+          <p>{{ mpesaErrorMessage || 'The payment was not completed. Please try again.' }}</p>
+          <div class="form-actions" style="justify-content: center;">
+            <button @click="closeMpesaModal" class="btn btn-secondary">Cancel</button>
+            <button @click="retryMpesa" class="btn btn-mpesa-submit">
+              <span class="mpesa-logo">M</span> Retry Payment
+            </button>
+          </div>
+        </div>
+
+        <!--Step 5: Payment timeout-->
+        <div v-if="mpesaStatus === 'timeout'" class="mpesa-body mpesa-result mpesa-timeout">
+          <div class="result-icon">⏰</div>
+          <h3>Payment Timeout</h3>
+          <p>The payment process took too long and has timed out. Please try again.</p>
+          <div class="form-actions" style="justify-content: center;">
+            <button @click="closeMpesaModal" class="btn btn-secondary">Cancel</button>
+            <button @click="recheckPayment" class="btn btn-mpesa-submit">
+              <span class="mpesa-logo">M</span> Retry Payment
+            </button>
+          </div>
+        </div>
+      </div>
+     </div>
 
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="modal" @click.self="closeDeleteModal">
@@ -251,7 +338,15 @@ export default {
         show: false,
         message: '',
         type: 'success'
-      }
+      },
+      showMpesaModal: false,
+      mpesaBill: null,
+      mpesaPhone: '',
+      mpesaPhoneError: '',
+      mpesaStatus: 'idle', // idle | pending | success | failed
+      mpesaErrorMessage: '',
+      mpesaCheckoutRequestId: null,
+      mpesaPollingTimer: null,
     }
   },
   computed: {
@@ -272,9 +367,7 @@ export default {
       }).length;
     },
     filteredBills() {
-      let filtered = [...this.bills];
-      
-      // Apply search filter
+      let filtered = [...this.bills];      
       if (this.searchQuery && this.searchQuery.trim()) {
         filtered = filtered.filter(bill => {
           const name = this.getBillName(bill);
@@ -282,7 +375,6 @@ export default {
         });
       }
       
-      // Apply status filter
       if (this.statusFilter !== 'all') {
         filtered = filtered.filter(bill => {
           const status = this.getStatus(bill.due_date);
@@ -304,6 +396,13 @@ export default {
   },
   mounted() {
     this.fetchBills();
+    const saved = localStorage.getItem('mpesa_phone');
+    if (saved) {
+      this.mpesaPhone = saved;
+    }
+  },
+  beforeUnmount() {
+    this.clearPolling();
   },
   methods: {
     // Helper method to get bill name safely
@@ -534,13 +633,157 @@ export default {
     clearFilters() {
       this.searchQuery = '';
       this.statusFilter = 'all';
+    },
+
+    openMpesaModal(bill) {
+      this.mpesaBill = bill;
+      this.mpesaStatus = 'idle';
+      this.mpesaErrorMessage = '';
+      this.mpesaCheckoutRequestId = null;
+      this.mpesaPhoneError = '';
+      this.showMpesaModal = true;
+    },
+
+    closeMpesaModal() {
+      if (this.mpesaStatus === 'pending') return;
+      this.clearPolling();
+      this.showMpesaModal = false;
+      this.mpesaBill = null;
+      this.mpesaStatus = 'idle';
+      this.mpesaCheckoutRequestId = null;
+    },
+
+    retryMpesa() {
+      this.mpesaStatus = 'idle';
+      this.mpesaErrorMessage = '';
+    },
+
+    validatePhone(phone) {
+      const cleaned = phone.replace(/\s+/g, '');
+      return /^(\+?254|0)[17]\d{8}$/.test(cleaned);
+    },
+
+    normalizePhone(phone) {
+      const cleaned = phone.replace(/\s+/g, '');
+      if (cleaned.startsWith('+254')) return cleaned.replace('+', '');
+      if (cleaned.startsWith('254')) return cleaned;
+      if (cleaned.startsWith('0')) return '254' + cleaned.slice(1);
+      return cleaned;
+    },
+
+    async initiateMpesaPayment() {
+      this.mpesaPhoneError = '';
+      if (!this.validatePhone(this.mpesaPhone)) {
+        this.mpesaPhoneError = 'Please enter a valid Kenyan phone number';
+        return;
+      }
+
+      localStorage.setItem('mpesa_phone', this.mpesaPhone);
+      const normalizedPhone = this.normalizePhone(this.mpesaPhone);
+      this.mpesaStatus = 'pending';
+
+      try {
+        const response = await api.post('/mpesa/stkpush', {
+          phone: normalizedPhone,
+          amount: Math.ceil(parseFloat(this.mpesaBill.amount)),
+          bill_id: this.mpesaBill.id,
+          account_reference: this.getBillName(this.mpesaBill),
+          transaction_desc: `Payment for ${this.getBillName(this.mpesaBill)}`
+        });
+
+        this.mpesaCheckoutRequestId = response.data.mpesaCheckoutRequestID || response.data.checkout_request_id;
+        this.startPolling();
+      } catch (error) {
+        this.mpesaStatus = 'failed';
+        this.mpesaErrorMessage = error.response?.data?.message || 'Failed to initiate M-Pesa Payment. Kindly try again.';
+        console.error('Error initiating M-Pesa payment:', error);
+      }
+    },
+
+    startPolling() {
+      let attempts = 0;
+      const maxAttempts = 20; // 60 seconds
+      this.mpesaPollingTimer = setInterval(async () => {
+        attempts++;
+        try {
+          const response = await api.get(`/mpesa/status/${this.mpesaCheckoutRequestId}`);
+          const status = response.data.status || response.data.ResultCode;
+          if (status === 'success' || status === 0) {
+            this.clearPolling();
+            await this.onPaymentSuccess();
+          } else if (status === 'failed' || (status !== 'pending' && status !== undefined && status !== 0)) {
+            this.clearPolling();
+            this.mpesaStatus = 'failed';
+            this.mpesaErrorMessage = response.data.message || 'Payment failed. Please try again.';
+          } else if (attempts >= maxAttempts) {
+            this.clearPolling();
+            this.mpesaStatus = 'timeout';
+            this.mpesaErrorMessage = 'Payment confirmation timed out. Please check your phone and try again if payment was successful.';
+          }
+        } catch (error) {
+          if (attempts >= maxAttempts) {
+            this.clearPolling();
+            this.mpesaStatus = 'failed';
+            this.mpesaErrorMessage = 'Payment confirmation timed out. Please check your phone and try again if payment was successful.';
+          }
+        }
+      }, 3000);
+    },
+
+    clearPolling() {
+      if (this.mpesaPollingTimer) {
+        clearInterval(this.mpesaPollingTimer);
+        this.mpesaPollingTimer = null;
+      }
+    },
+
+    async onPaymentSuccess() {
+      try {
+        const updatedBill = await api.put(`/bills/${this.mpesaBill.id}`, {
+          ...this.mpesaBill,
+          status: 'paid'
+        });
+        const index = this.bills.findIndex(b => b.id === this.mpesaBill.id);
+        if (index !== -1) {
+          this.bills[index] = {...this.bills[index], status: 'paid' };
+        }
+        await api.post('/expenses', {
+          name: this.getBillName(this.mpesaBill),
+          amount: this.mpesaBill.amount,
+          date: new Date().toISOString().split('T')[0],
+          category: 'Bills',
+          bill_id: this.mpesaBill.id,
+          payment_method: 'mpesa',
+          notes: `Paid via M-Pesa from ${this.mpesaPhone}`
+        });
+        this.mpesaStatus = 'success';
+        this.showToast(`${this.getBillName(this.mpesaBill)} paid successful via M-Pesa.`);
+      } catch (error) {
+        console.error('Post payment update error:', error);
+        this.mpesaStatus = 'success';
+        this.showToast('Payment was received! Note: expense record may need manual sync.', 'error');
+      }
+    },
+
+    async recheckPayment() {
+      try {
+        const response = await api.get(`/mpesa/status/${this.mpesaCheckoutRequestId}`);
+        const status = response.data.status;
+        if (status === 'success') {
+          await this.onPaymentSuccess();
+        } else {
+          this.showToast('Payment has not been confirmed yet. Check your messages.', 'error');
+        }
+      } catch (error) {
+        console.error('Error rechecking payment:', error);
+        this.showToast('Failed to recheck payment status. Please try again.', 'error');
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-/* All the styles remain the same as previous */
 .bills-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -850,6 +1093,202 @@ export default {
   font-size: 0.7rem;
   color: #6b7280;
   text-align: right;
+}
+
+/* Mpesa */
+.btn-mpesa {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.625rem 1rem;
+  background: #00a651;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  justify-content: center;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-mpesa:hover {
+  background: #008c44;
+  transform: translateY(-1px);
+}
+
+.btn-mpesa:active {
+  transform: translateY(0);
+}
+
+.mpesa-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: white;
+  color: #00a651;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.paid-badge {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #10b981;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.mpesa-modal {
+  max-width: 500px;
+}
+
+.mpesa-header {
+  background: #00a651;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.mpesa-header h2 {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mpesa-header .close-btn {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mpesa-header .close-btn:hover {
+  color: white;
+}
+
+.mpesa-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mpesa-badge {
+  background: white;
+  color: #00a651;
+  font-size: 0.625rem;
+  font-weight: 900;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  letter-spacing: 1px;
+}
+
+.mpesa-body { padding: 1.5rem; }
+ 
+.mpesa-bill-summary {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mpesa-bill-name { font-weight: 600; color: #1a1a1a; }
+.mpesa-bill-amount { font-size: 1.25rem; font-weight: 700; color: #00a651; }
+ 
+.mpesa-hint { font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; }
+ 
+.btn-mpesa-submit {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: #00a651;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-mpesa-submit:hover:not(:disabled) {
+  background: #008c44;
+}
+
+.btn-mpesa-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mpesa-waiting {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.mpesa-spinner-wrap {
+  margin: 0 auto 1.5rem;
+  width: 64px;
+  height: 64px;
+}
+
+.mpesa-spinner {
+  width: 64px;
+  height: 64px;
+  border: 4px solid #bbf7d0;
+  border-top-color: #00a651;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.mpesa-waiting h3 {
+  color: #1a1a1a;
+  margin-bottom: 0.75rem;
+}
+
+.mpesa-waiting p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.mpesa-amount-confirm {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #00a651;
+  margin: 1rem 0;
+}
+
+.mpesa-result {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.result-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.mpesa-result h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #1a1a1a;
+}
+
+.mpesa-result p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.mpesa-success .result-icon {
+  filter: none;
 }
 
 /* Loading State */
