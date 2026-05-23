@@ -201,7 +201,6 @@ const fetchDashboardStats = async () => {
         const response = await api.get('/dashboard');
         stats.value = response.data;
     } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
         showToast('Failed to load dashboard stats', 'error');
     }
 }
@@ -211,7 +210,6 @@ const fetchUsers = async () => {
         const response = await api.get('/users');
         users.value = response.data;
     } catch (error) {
-        console.error('Error fetching users:', error);
         showToast('Failed to load users', 'error');
     }
 }
@@ -221,7 +219,6 @@ const fetchExpenses = async () => {
         const response = await api.get('/expenses');
         expenses.value = response.data;
     } catch (error) {
-        console.error('Error fetching expenses:', error);
         showToast('Failed to load expenses', 'error');
     }
 }
@@ -231,7 +228,6 @@ const fetchBills = async () => {
         const response = await api.get('/bills');
         bills.value = response.data;
     } catch (error) {
-        console.error('Error fetching bills:', error);
         showToast('Failed to load bills', 'error');
     }
 }
@@ -241,7 +237,6 @@ const fetchShoppingItems = async () => {
         const response = await api.get('/shopping-items');
         shoppingItems.value = response.data;
     } catch (error) {
-        console.error('Error fetching shopping items:', error);
         showToast('Failed to load shopping items', 'error');
     }
 }
@@ -260,7 +255,6 @@ const saveUser = async () => {
         await fetchUsers();
         await fetchDashboardStats();
     } catch (error) {
-        console.error('Error saving user:', error);
         showToast(error.response?.data?.message || 'Failed to save user', 'error');
     } finally {
         saving.value = false;
@@ -297,7 +291,6 @@ const deleteExpense = async (id) => {
             await fetchExpenses();
             await fetchDashboardStats();
         } catch (error) {
-            console.error('Error deleting expense:', error);
             showToast('Failed to delete expense', 'error');
         }
     }
@@ -311,7 +304,6 @@ const deleteBill = async (id) => {
             await fetchBills();
             await fetchDashboardStats();
         } catch (error) {
-            console.error('Error deleting bill:', error);
             showToast('Failed to delete bill', 'error');
         }
     }
@@ -325,7 +317,6 @@ const deleteShoppingItem = async (id) => {
             await fetchShoppingItems();
             await fetchDashboardStats();
         } catch (error) {
-            console.error('Error deleting shopping item:', error);
             showToast('Failed to delete shopping item', 'error');
         }
     }
@@ -342,7 +333,6 @@ const performDelete = async () => {
         showDeleteConfirm.value = false;
         deleteItem.value = null;
     } catch (error) {
-        console.error('Error deleting item:', error);
         showToast('Failed to delete item', 'error');
     }
 }
@@ -360,7 +350,6 @@ const generateReport = async () => {
         await nextTick();
         updateCharts();
     } catch (error) {
-        console.error('Error generating report:', error);
         showToast('Failed to generate report', 'error');
     } finally {
         refreshing.value = false;
@@ -386,7 +375,6 @@ const exportReport = async () => {
         window.URL.revokeObjectURL(url);
         showToast('Report exported successfully');
     } catch (error) {
-        console.error('Error exporting report:', error);
         showToast('Failed to export report', 'error');
     }
 }

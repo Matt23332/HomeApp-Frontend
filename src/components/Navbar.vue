@@ -100,9 +100,7 @@ const closeMobileMenu = () => {
 
 const toggleUserMenu = (event) => {
     event?.stopPropagation();
-    console.log('Toggle called, current value:', userMenuOpen.value);
     userMenuOpen.value = !userMenuOpen.value;
-    console.log('new value after toggle:', userMenuOpen.value);
     notificationsOpen.value = false;
 }
 
@@ -164,7 +162,6 @@ const handleOutsideClick = (event) => {
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('mousedown', handleScroll);
-    console.log('Navbar mounted');
 });
 
 onUnmounted(() => {

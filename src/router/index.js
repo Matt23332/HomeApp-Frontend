@@ -1,35 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import Dashboard from '@/components/Dashboard.vue'
-import LandingPage from '@/components/LandingPage.vue'
-import Login from '@/components/Login.vue'
-import Register from '@/components/Register.vue'
-import Expenses from '@/components/Expenses.vue'
-import Reports from '@/components/Reports.vue'
-import Profile from '@/components/Profile.vue'
-import Payments from '@/components/Payments.vue'
-import Bills from '@/components/Bills.vue'
-import ShoppingItems from '@/components/ShoppingItems.vue'
-import Admin from '@/components/Admin.vue'
-import ForgotPassword from '@/components/ForgotPassword.vue'
-import Setting from '@/components/Setting.vue'
-import Notification from '@/components/Notification.vue'
 
 const routes = [
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard },
-  { path: '/', name: 'LandingPage', component: LandingPage },
-  { path: '/login', name: 'Login', component: Login},
-  { path: '/register', name: 'Register', component: Register },
-  { path: '/expenses', name: 'Expenses', component: Expenses },
-  { path: '/reports', name: 'Reports', component: Reports },
-  { path: '/profile', name: 'Profile', component: Profile },
-  { path: '/payments', name: 'Payments', component: Payments },
-  { path: '/bills', name: 'Bills', component: Bills },
-  { path: '/shopping-items', name: 'ShoppingItems', component: ShoppingItems },
-  { path: '/admin', name: 'Admin', component: Admin, meta: { requiresAuth: true, requiresAdmin: true } },
-  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword },
-  { path: '/settings', name: 'Settings', component: Setting },
-  { path: '/notifications', name: 'Notifications', component: Notification },
+  { path: '/', name: 'LandingPage', component: () => import('@/components/LandingPage.vue') },
+  { path: '/login', name: 'Login', component: () => import('@/components/Login.vue') },
+  { path: '/register', name: 'Register', component: () => import('@/components/Register.vue') },
+  { path: '/forgot-password', name: 'ForgotPassword', component: () => import('@/components/ForgotPassword.vue') },
+  { path: '/dashboard', name: 'Dashboard', component: () => import('@/components/Dashboard.vue'), meta: { requiresAuth: true } },
+  { path: '/expenses', name: 'Expenses', component: () => import('@/components/Expenses.vue'), meta: { requiresAuth: true } },
+  { path: '/reports', name: 'Reports', component: () => import('@/components/Reports.vue'), meta: { requiresAuth: true } },
+  { path: '/profile', name: 'Profile', component: () => import('@/components/Profile.vue'), meta: { requiresAuth: true } },
+  { path: '/payments', name: 'Payments', component: () => import('@/components/Payments.vue'), meta: { requiresAuth: true } },
+  { path: '/bills', name: 'Bills', component: () => import('@/components/Bills.vue'), meta: { requiresAuth: true } },
+  { path: '/shopping-items', name: 'ShoppingItems', component: () => import('@/components/ShoppingItems.vue'), meta: { requiresAuth: true } },
+  { path: '/settings', name: 'Settings', component: () => import('@/components/Setting.vue'), meta: { requiresAuth: true } },
+  { path: '/notifications', name: 'Notifications', component: () => import('@/components/Notification.vue'), meta: { requiresAuth: true } },
+  { path: '/admin', name: 'Admin', component: () => import('@/components/Admin.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
 ]
 
 const router = createRouter({
@@ -42,6 +28,10 @@ router.beforeEach((to) => {
 
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return { path: '/login' }
+  }
+
+  if (to.meta.requiresAdmin && auth.userRole !== 'Admin') {
+    return { path: '/dashboard' }
   }
 
   if ((to.path === '/login' || to.path === '/register') && auth.isLoggedIn) {
