@@ -95,7 +95,6 @@ const fetchDashboardData = async () => {
 
     const response = await api.get('/dashboard');
     const data = response.data;
-    console.log('Dashboard data:', data);
 
     summary.value = data.summary ?? summary.value;
     userData.value = data.user ?? userData.value;
@@ -109,7 +108,6 @@ const fetchDashboardData = async () => {
       initExpenseChart();
     }, 100);
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
   } finally {
     loading.value = false;
   }
@@ -124,7 +122,6 @@ const togglePurchase = async (item) => {
     await api.post(`/shopping-items/${item.id}`, { purchased: item.purchased });
     refreshData();
   } catch (error) {
-    console.error('Error updating the item: ', error);
     item.purchased = !item.purchased;
   }
 }
@@ -142,9 +139,7 @@ const addExpense = async () => {
     };
 
     await fetchDashboardData();
-    console.log('Expense added successfully');
   } catch (error) {
-    console.error('Error adding expense: ', error);
   } finally {
     submitting.value = false;
   }
@@ -158,9 +153,7 @@ const generateReport = async () => {
         end_date: new Date().toISOString().split('T')[0]
       }
     });
-    console.log('Report data:', response.data);
   } catch (error) {
-    console.error('Error generating report:', error);
   }
 }
 
@@ -179,7 +172,6 @@ const exportData = async () => {
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Error exporting data:', error);
   }
 }
 
@@ -260,9 +252,7 @@ const updateChart = async () => {
     expenseBreakdown.value = response.data.expense_breakdown ?? [];
     initExpenseChart();
   } catch (error) {
-    console.error('Error updating chart data:', error);
     if (error.response?.status === 401) {
-      console.warn('Summary endpoint not found, using dashboard data');
       const dashboardResponse = await api.get('/dashboard');
       expenseBreakdown.value = dashboardResponse.data.expense_breakdown ?? [];
       initExpenseChart();

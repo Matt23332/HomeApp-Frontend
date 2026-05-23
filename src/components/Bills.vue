@@ -230,7 +230,7 @@
           </div>
           <div class="form-actions">
             <button @click="closeMpesaModal" class="btn btn-secondary">Cancel</button>
-            <button @click="initiateMpesaPayment" class="btn btn-mpesa-submit" :disabled="!mpesaPhone">
+            <button @click="initiateMpesaPayment" class="btn btn-mpesa-submit" :disabled="!mpesaPhone || mpesaSubmitting">
               <span class="mpesa-logo">M</span> Send STK Push
             </button>
           </div>
@@ -275,8 +275,8 @@
           <p>The payment process took too long and has timed out. Please try again.</p>
           <div class="form-actions" style="justify-content: center;">
             <button @click="closeMpesaModal" class="btn btn-secondary">Cancel</button>
-            <button @click="recheckPayment" class="btn btn-mpesa-submit">
-              <span class="mpesa-logo">M</span> Retry Payment
+            <button @click="recheckPayment" class="btn btn-mpesa-submit" :disabled="recheckingPayment">
+              <span class="mpesa-logo">M</span> {{ recheckingPayment ? 'Checking...' : 'Retry Payment' }}
             </button>
           </div>
         </div>
@@ -297,7 +297,7 @@
         </div>
         <div class="modal-actions">
           <button @click="closeDeleteModal" class="btn btn-secondary">Cancel</button>
-          <button @click="deleteBill" class="btn btn-danger">Delete Bill</button>
+          <button @click="deleteBill" class="btn btn-danger" :disabled="deleting">{{ deleting ? 'Deleting...' : 'Delete Bill' }}</button>
         </div>
       </div>
     </div>
@@ -310,475 +310,402 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import api from '../services/api';
 
-export default {
-  name: 'Bills',
-  data() {
-    return {
-      bills: [],
-      loading: false,
-      saving: false,
-      showFormModal: false,
-      showDeleteModal: false,
-      isEditing: false,
-      currentBillId: null,
-      billToDelete: null,
-      searchQuery: '',
-      statusFilter: 'all',
-      form: {
-        name: '',
-        amount: '',
-        due_date: '',
-        status: 'unpaid'
-      },
-      errors: {},
-      toast: {
-        show: false,
-        message: '',
-        type: 'success'
-      },
-      showMpesaModal: false,
-      mpesaBill: null,
-      mpesaPhone: '',
-      mpesaPhoneError: '',
-      mpesaStatus: 'idle', // idle | pending | success | failed
-      mpesaErrorMessage: '',
-      mpesaCheckoutRequestId: null,
-      mpesaPollingTimer: null,
+const bills = ref([]);
+const loading = ref(false);
+const saving = ref(false);
+const showFormModal = ref(false);
+const showDeleteModal = ref(false);
+const isEditing = ref(false);
+const currentBillId = ref(null);
+const billToDelete = ref(null);
+const searchQuery = ref('');
+const statusFilter = ref('all');
+const form = reactive({
+  name: '',
+  amount: '',
+  due_date: '',
+  status: 'unpaid'
+});
+const errors = ref({});
+const toast = reactive({ show: false, message: '', type: 'success' });
+const showMpesaModal = ref(false);
+const mpesaBill = ref(null);
+const mpesaPhone = ref('');
+const mpesaPhoneError = ref('');
+const mpesaStatus = ref('idle');
+const mpesaErrorMessage = ref('');
+const mpesaCheckoutRequestId = ref(null);
+const mpesaPollingTimer = ref(null);
+const mpesaSubmitting = ref(false);
+const recheckingPayment = ref(false);
+const deleting = ref(false);
+
+const todayDate = computed(() => new Date().toISOString().split('T')[0]);
+
+const totalAmount = computed(() => {
+  if (!bills.value.length) return '0.00';
+  return bills.value.reduce((sum, bill) => sum + parseFloat(bill.amount || 0), 0).toFixed(2);
+});
+
+const overdueCount = computed(() =>
+  bills.value.filter(bill => getStatus(bill.due_date) === 'Overdue').length
+);
+
+const dueThisWeekCount = computed(() =>
+  bills.value.filter(bill => {
+    const status = getStatus(bill.due_date);
+    return status === 'Due Today' || status === 'Due Soon';
+  }).length
+);
+
+const filteredBills = computed(() => {
+  let filtered = [...bills.value];
+  if (searchQuery.value.trim()) {
+    filtered = filtered.filter(bill =>
+      getBillName(bill).toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(bill => {
+      const status = getStatus(bill.due_date);
+      if (statusFilter.value === 'overdue') return status === 'Overdue';
+      if (statusFilter.value === 'due_today') return status === 'Due Today';
+      if (statusFilter.value === 'due_soon') return status === 'Due Soon';
+      if (statusFilter.value === 'upcoming') return status === 'Upcoming';
+      return true;
+    });
+  }
+  return filtered.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+});
+
+onMounted(() => {
+  fetchBills();
+  const saved = localStorage.getItem('mpesa_phone');
+  if (saved) mpesaPhone.value = saved;
+});
+
+onBeforeUnmount(() => clearPolling());
+
+function getBillName(bill) {
+  if (!bill) return 'Untitled Bill';
+  return bill.bill_name || bill.name || 'Untitled Bill';
+}
+
+function getErrorMessage(error) {
+  if (Array.isArray(error)) return error[0];
+  if (typeof error === 'string') return error;
+  return 'Invalid input';
+}
+
+function showToast(message, type = 'success') {
+  toast.show = true;
+  toast.message = message;
+  toast.type = type;
+  setTimeout(() => { toast.show = false; }, 3000);
+}
+
+function formatAmount(amount) {
+  if (!amount && amount !== 0) return '0.00';
+  return parseFloat(amount).toFixed(2);
+}
+
+function formatDate(date) {
+  if (!date) return 'No date';
+  try {
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch {
+    return 'Invalid date';
+  }
+}
+
+function getDaysRemaining(dueDate) {
+  if (!dueDate) return 999;
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+  } catch {
+    return 999;
+  }
+}
+
+function getProgressPercentage(dueDate) {
+  const d = getDaysRemaining(dueDate);
+  if (d >= 7) return 100;
+  if (d <= 0) return 0;
+  return (d / 7) * 100;
+}
+
+function getStatus(dueDate) {
+  const d = getDaysRemaining(dueDate);
+  if (d < 0) return 'Overdue';
+  if (d === 0) return 'Due Today';
+  if (d <= 3) return 'Due Soon';
+  return 'Upcoming';
+}
+
+function getStatusClass(dueDate) {
+  const status = getStatus(dueDate);
+  if (status === 'Overdue') return 'status-overdue';
+  if (status === 'Due Today') return 'status-today';
+  if (status === 'Due Soon') return 'status-soon';
+  return 'status-upcoming';
+}
+
+function getBillIcon(bill) {
+  const name = getBillName(bill).toLowerCase();
+  const icons = {
+    electricity: '⚡', water: '💧', internet: '🌐', netflix: '📺',
+    spotify: '🎵', rent: '🏠', mortgage: '🏡', insurance: '🛡️',
+    phone: '📱', gas: '⛽', groceries: '🛒', subscription: '📅',
+  };
+  for (const [key, icon] of Object.entries(icons)) {
+    if (name.includes(key)) return icon;
+  }
+  return '📄';
+}
+
+async function fetchBills() {
+  loading.value = true;
+  try {
+    const response = await api.get('/bills');
+    let data = response.data;
+    if (data && data.data) data = data.data;
+    bills.value = Array.isArray(data) ? data : [];
+  } catch {
+    showToast('Failed to load bills', 'error');
+    bills.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
+
+function openCreateModal() {
+  isEditing.value = false;
+  currentBillId.value = null;
+  Object.assign(form, { name: '', amount: '', due_date: todayDate.value, status: 'unpaid' });
+  errors.value = {};
+  showFormModal.value = true;
+}
+
+function openEditModal(bill) {
+  isEditing.value = true;
+  currentBillId.value = bill.id;
+  Object.assign(form, {
+    name: getBillName(bill),
+    amount: bill.amount || '',
+    due_date: bill.due_date ? bill.due_date.split('T')[0] : todayDate.value,
+    status: bill.status || 'unpaid',
+  });
+  errors.value = {};
+  showFormModal.value = true;
+}
+
+async function saveBill() {
+  saving.value = true;
+  errors.value = {};
+  try {
+    if (isEditing.value) {
+      const response = await api.put(`/bills/${currentBillId.value}`, form);
+      const index = bills.value.findIndex(b => b.id === currentBillId.value);
+      if (index !== -1) bills.value[index] = response.data.data || response.data;
+      showToast('Bill updated successfully');
+    } else {
+      const response = await api.post('/bills', form);
+      bills.value.unshift(response.data.data || response.data);
+      showToast('Bill created successfully');
     }
-  },
-  computed: {
-    todayDate() {
-      return new Date().toISOString().split('T')[0];
-    },
-    totalAmount() {
-      if (!this.bills.length) return '0.00';
-      return this.bills.reduce((sum, bill) => sum + parseFloat(bill.amount || 0), 0).toFixed(2);
-    },
-    overdueCount() {
-      return this.bills.filter(bill => this.getStatus(bill.due_date) === 'Overdue').length;
-    },
-    dueThisWeekCount() {
-      return this.bills.filter(bill => {
-        const status = this.getStatus(bill.due_date);
-        return status === 'Due Today' || status === 'Due Soon';
-      }).length;
-    },
-    filteredBills() {
-      let filtered = [...this.bills];      
-      if (this.searchQuery && this.searchQuery.trim()) {
-        filtered = filtered.filter(bill => {
-          const name = this.getBillName(bill);
-          return name.toLowerCase().includes(this.searchQuery.toLowerCase());
-        });
-      }
-      
-      if (this.statusFilter !== 'all') {
-        filtered = filtered.filter(bill => {
-          const status = this.getStatus(bill.due_date);
-          if (this.statusFilter === 'overdue') return status === 'Overdue';
-          if (this.statusFilter === 'due_today') return status === 'Due Today';
-          if (this.statusFilter === 'due_soon') return status === 'Due Soon';
-          if (this.statusFilter === 'upcoming') return status === 'Upcoming';
-          return true;
-        });
-      }
-      
-      // Sort by due date (closest first)
-      return filtered.sort((a, b) => {
-        const dateA = new Date(a.due_date);
-        const dateB = new Date(b.due_date);
-        return dateA - dateB;
-      });
+    closeFormModal();
+  } catch (error) {
+    if (error.response?.data?.errors) {
+      errors.value = error.response.data.errors;
+    } else {
+      showToast(error.response?.data?.message || 'Failed to save bill', 'error');
     }
-  },
-  mounted() {
-    this.fetchBills();
-    const saved = localStorage.getItem('mpesa_phone');
-    if (saved) {
-      this.mpesaPhone = saved;
-    }
-  },
-  beforeUnmount() {
-    this.clearPolling();
-  },
-  methods: {
-    // Helper method to get bill name safely
-    getBillName(bill) {
-      if (!bill) return 'Untitled Bill';
-      return bill.bill_name || bill.name || 'Untitled Bill';
-    },
-    
-    // Helper method to get error message
-    getErrorMessage(error) {
-      if (Array.isArray(error)) {
-        return error[0];
+  } finally {
+    saving.value = false;
+  }
+}
+
+function confirmDelete(bill) {
+  billToDelete.value = bill;
+  showDeleteModal.value = true;
+}
+
+async function deleteBill() {
+  if (deleting.value) return;
+  deleting.value = true;
+  try {
+    await api.delete(`/bills/${billToDelete.value.id}`);
+    bills.value = bills.value.filter(b => b.id !== billToDelete.value.id);
+    closeDeleteModal();
+    showToast('Bill deleted successfully');
+  } catch {
+    showToast('Failed to delete bill', 'error');
+  } finally {
+    deleting.value = false;
+  }
+}
+
+function closeFormModal() {
+  showFormModal.value = false;
+  Object.assign(form, { name: '', amount: '', due_date: '', status: 'unpaid' });
+  errors.value = {};
+}
+
+function closeDeleteModal() {
+  showDeleteModal.value = false;
+  billToDelete.value = null;
+}
+
+function clearFilters() {
+  searchQuery.value = '';
+  statusFilter.value = 'all';
+}
+
+function openMpesaModal(bill) {
+  mpesaBill.value = bill;
+  mpesaStatus.value = 'idle';
+  mpesaErrorMessage.value = '';
+  mpesaCheckoutRequestId.value = null;
+  mpesaPhoneError.value = '';
+  showMpesaModal.value = true;
+}
+
+function closeMpesaModal() {
+  if (mpesaStatus.value === 'pending') return;
+  clearPolling();
+  showMpesaModal.value = false;
+  mpesaBill.value = null;
+  mpesaStatus.value = 'idle';
+  mpesaCheckoutRequestId.value = null;
+}
+
+function retryMpesa() {
+  mpesaStatus.value = 'idle';
+  mpesaErrorMessage.value = '';
+}
+
+function validatePhone(phone) {
+  return /^(\+?254|0)[17]\d{8}$/.test(phone.replace(/\s+/g, ''));
+}
+
+function normalizePhone(phone) {
+  const cleaned = phone.replace(/\s+/g, '');
+  if (cleaned.startsWith('+254')) return cleaned.replace('+', '');
+  if (cleaned.startsWith('254')) return cleaned;
+  if (cleaned.startsWith('0')) return '254' + cleaned.slice(1);
+  return cleaned;
+}
+
+async function initiateMpesaPayment() {
+  if (mpesaSubmitting.value) return;
+  mpesaSubmitting.value = true;
+  mpesaPhoneError.value = '';
+  if (!validatePhone(mpesaPhone.value)) {
+    mpesaPhoneError.value = 'Please enter a valid Kenyan phone number';
+    mpesaSubmitting.value = false;
+    return;
+  }
+  localStorage.setItem('mpesa_phone', mpesaPhone.value);
+  const normalizedPhone = normalizePhone(mpesaPhone.value);
+  mpesaStatus.value = 'pending';
+  try {
+    const response = await api.post('/mpesa/stkpush', {
+      phone: normalizedPhone,
+      amount: Math.ceil(parseFloat(mpesaBill.value.amount)),
+      bill_id: mpesaBill.value.id,
+      account_reference: getBillName(mpesaBill.value),
+      transaction_desc: `Payment for ${getBillName(mpesaBill.value)}`,
+    });
+    mpesaCheckoutRequestId.value = response.data.mpesaCheckoutRequestID || response.data.checkout_request_id;
+    startPolling();
+  } catch (error) {
+    mpesaStatus.value = 'failed';
+    mpesaErrorMessage.value = error.response?.data?.message || 'Failed to initiate M-Pesa Payment. Kindly try again.';
+  } finally {
+    mpesaSubmitting.value = false;
+  }
+}
+
+function startPolling() {
+  let attempts = 0;
+  const maxAttempts = 20;
+  mpesaPollingTimer.value = setInterval(async () => {
+    attempts++;
+    try {
+      const response = await api.get(`/mpesa/status/${mpesaCheckoutRequestId.value}`);
+      const status = response.data.status || response.data.ResultCode;
+      if (status === 'success' || status === 0) {
+        clearPolling();
+        await onPaymentSuccess();
+      } else if (status === 'failed' || (status !== 'pending' && status !== undefined && status !== 0)) {
+        clearPolling();
+        mpesaStatus.value = 'failed';
+        mpesaErrorMessage.value = response.data.message || 'Payment failed. Please try again.';
+      } else if (attempts >= maxAttempts) {
+        clearPolling();
+        mpesaStatus.value = 'timeout';
       }
-      if (typeof error === 'string') {
-        return error;
-      }
-      return 'Invalid input';
-    },
-    
-    showToast(message, type = 'success') {
-      this.toast = { show: true, message, type };
-      setTimeout(() => {
-        this.toast.show = false;
-      }, 3000);
-    },
-    
-    formatAmount(amount) {
-      if (!amount && amount !== 0) return '0.00';
-      return parseFloat(amount).toFixed(2);
-    },
-    
-    formatDate(date) {
-      if (!date) return 'No date';
-      try {
-        return new Date(date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-      } catch (error) {
-        return 'Invalid date';
-      }
-    },
-    
-    getDaysRemaining(dueDate) {
-      if (!dueDate) return 999;
-      try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const due = new Date(dueDate);
-        due.setHours(0, 0, 0, 0);
-        const diffTime = due - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-      } catch (error) {
-        return 999;
-      }
-    },
-    
-    getProgressPercentage(dueDate) {
-      const daysRemaining = this.getDaysRemaining(dueDate);
-      if (daysRemaining >= 7) return 100;
-      if (daysRemaining <= 0) return 0;
-      return (daysRemaining / 7) * 100;
-    },
-    
-    getStatus(dueDate) {
-      const daysRemaining = this.getDaysRemaining(dueDate);
-      
-      if (daysRemaining < 0) return 'Overdue';
-      if (daysRemaining === 0) return 'Due Today';
-      if (daysRemaining <= 3) return 'Due Soon';
-      return 'Upcoming';
-    },
-    
-    getStatusClass(dueDate) {
-      const status = this.getStatus(dueDate);
-      if (status === 'Overdue') return 'status-overdue';
-      if (status === 'Due Today') return 'status-today';
-      if (status === 'Due Soon') return 'status-soon';
-      if (status === 'Upcoming') return 'status-upcoming';
-      return '';
-    },
-    
-    getBillIcon(bill) {
-      const name = this.getBillName(bill).toLowerCase();
-      const icons = {
-        'electricity': '⚡',
-        'water': '💧',
-        'internet': '🌐',
-        'netflix': '📺',
-        'spotify': '🎵',
-        'rent': '🏠',
-        'mortgage': '🏡',
-        'insurance': '🛡️',
-        'phone': '📱',
-        'gas': '⛽',
-        'groceries': '🛒',
-        'subscription': '📅'
-      };
-      
-      for (const [key, icon] of Object.entries(icons)) {
-        if (name.includes(key)) {
-          return icon;
-        }
-      }
-      return '📄';
-    },
-    
-    async fetchBills() {
-      this.loading = true;
-      try {
-        const response = await api.get('/bills');
-        // Handle different response structures
-        let billsData = response.data;
-        if (billsData && billsData.data) {
-          billsData = billsData.data;
-        }
-        if (Array.isArray(billsData)) {
-          this.bills = billsData;
-        } else {
-          this.bills = [];
-        }
-        console.log('Bills fetched:', this.bills);
-      } catch (error) {
-        console.error('Error fetching bills:', error);
-        this.showToast('Failed to load bills', 'error');
-        this.bills = [];
-      } finally {
-        this.loading = false;
-      }
-    },
-    
-    openCreateModal() {
-      this.isEditing = false;
-      this.currentBillId = null;
-      this.form = {
-        name: '',
-        amount: '',
-        due_date: this.todayDate,
-        status: 'unpaid'
-      };
-      this.errors = {};
-      this.showFormModal = true;
-    },
-    
-    openEditModal(bill) {
-      this.isEditing = true;
-      this.currentBillId = bill.id;
-      this.form = {
-        name: this.getBillName(bill),
-        amount: bill.amount || '',
-        due_date: bill.due_date ? bill.due_date.split('T')[0] : this.todayDate,
-        status: bill.status || 'unpaid'
-      };
-      this.errors = {};
-      this.showFormModal = true;
-    },
-    
-    async saveBill() {
-      this.saving = true;
-      this.errors = {};
-      console.log('Sending payload:', JSON.stringify(this.form));
-      
-      try {
-        let response;
-        if (this.isEditing) {
-          response = await api.put(`/bills/${this.currentBillId}`, this.form);
-          const index = this.bills.findIndex(b => b.id === this.currentBillId);
-          if (index !== -1) {
-            this.bills[index] = response.data.data || response.data;
-          }
-          this.showToast('Bill updated successfully');
-        } else {
-          response = await api.post('/bills', this.form);
-          const newBill = response.data.data || response.data;
-          this.bills.unshift(newBill);
-          this.showToast('Bill created successfully');
-        }
-        
-        this.closeFormModal();
-      } catch (error) {
-        console.error('Validation errors:', error.response?.data);
-        console.error('Error saving bill:', error);
-        if (error.response?.data?.errors) {
-          this.errors = error.response.data.errors;
-        } else {
-          this.showToast(error.response?.data?.message || 'Failed to save bill', 'error');
-        }
-      } finally {
-        this.saving = false;
-      }
-    },
-    
-    confirmDelete(bill) {
-      this.billToDelete = bill;
-      this.showDeleteModal = true;
-    },
-    
-    async deleteBill() {
-      try {
-        await api.delete(`/bills/${this.billToDelete.id}`);
-        this.bills = this.bills.filter(b => b.id !== this.billToDelete.id);
-        this.closeDeleteModal();
-        this.showToast('Bill deleted successfully');
-      } catch (error) {
-        console.error('Error deleting bill:', error);
-        this.showToast('Failed to delete bill', 'error');
-      }
-    },
-    
-    closeFormModal() {
-      this.showFormModal = false;
-      this.form = {
-        name: '',
-        amount: '',
-        due_date: '',
-        status: 'unpaid'
-      };
-      this.errors = {};
-    },
-    
-    closeDeleteModal() {
-      this.showDeleteModal = false;
-      this.billToDelete = null;
-    },
-    
-    clearFilters() {
-      this.searchQuery = '';
-      this.statusFilter = 'all';
-    },
-
-    openMpesaModal(bill) {
-      this.mpesaBill = bill;
-      this.mpesaStatus = 'idle';
-      this.mpesaErrorMessage = '';
-      this.mpesaCheckoutRequestId = null;
-      this.mpesaPhoneError = '';
-      this.showMpesaModal = true;
-    },
-
-    closeMpesaModal() {
-      if (this.mpesaStatus === 'pending') return;
-      this.clearPolling();
-      this.showMpesaModal = false;
-      this.mpesaBill = null;
-      this.mpesaStatus = 'idle';
-      this.mpesaCheckoutRequestId = null;
-    },
-
-    retryMpesa() {
-      this.mpesaStatus = 'idle';
-      this.mpesaErrorMessage = '';
-    },
-
-    validatePhone(phone) {
-      const cleaned = phone.replace(/\s+/g, '');
-      return /^(\+?254|0)[17]\d{8}$/.test(cleaned);
-    },
-
-    normalizePhone(phone) {
-      const cleaned = phone.replace(/\s+/g, '');
-      if (cleaned.startsWith('+254')) return cleaned.replace('+', '');
-      if (cleaned.startsWith('254')) return cleaned;
-      if (cleaned.startsWith('0')) return '254' + cleaned.slice(1);
-      return cleaned;
-    },
-
-    async initiateMpesaPayment() {
-      this.mpesaPhoneError = '';
-      if (!this.validatePhone(this.mpesaPhone)) {
-        this.mpesaPhoneError = 'Please enter a valid Kenyan phone number';
-        return;
-      }
-
-      localStorage.setItem('mpesa_phone', this.mpesaPhone);
-      const normalizedPhone = this.normalizePhone(this.mpesaPhone);
-      this.mpesaStatus = 'pending';
-
-      try {
-        const response = await api.post('/mpesa/stkpush', {
-          phone: normalizedPhone,
-          amount: Math.ceil(parseFloat(this.mpesaBill.amount)),
-          bill_id: this.mpesaBill.id,
-          account_reference: this.getBillName(this.mpesaBill),
-          transaction_desc: `Payment for ${this.getBillName(this.mpesaBill)}`
-        });
-
-        this.mpesaCheckoutRequestId = response.data.mpesaCheckoutRequestID || response.data.checkout_request_id;
-        this.startPolling();
-      } catch (error) {
-        this.mpesaStatus = 'failed';
-        this.mpesaErrorMessage = error.response?.data?.message || 'Failed to initiate M-Pesa Payment. Kindly try again.';
-        console.error('Error initiating M-Pesa payment:', error);
-      }
-    },
-
-    startPolling() {
-      let attempts = 0;
-      const maxAttempts = 20; // 60 seconds
-      this.mpesaPollingTimer = setInterval(async () => {
-        attempts++;
-        try {
-          const response = await api.get(`/mpesa/status/${this.mpesaCheckoutRequestId}`);
-          const status = response.data.status || response.data.ResultCode;
-          if (status === 'success' || status === 0) {
-            this.clearPolling();
-            await this.onPaymentSuccess();
-          } else if (status === 'failed' || (status !== 'pending' && status !== undefined && status !== 0)) {
-            this.clearPolling();
-            this.mpesaStatus = 'failed';
-            this.mpesaErrorMessage = response.data.message || 'Payment failed. Please try again.';
-          } else if (attempts >= maxAttempts) {
-            this.clearPolling();
-            this.mpesaStatus = 'timeout';
-            this.mpesaErrorMessage = 'Payment confirmation timed out. Please check your phone and try again if payment was successful.';
-          }
-        } catch (error) {
-          if (attempts >= maxAttempts) {
-            this.clearPolling();
-            this.mpesaStatus = 'failed';
-            this.mpesaErrorMessage = 'Payment confirmation timed out. Please check your phone and try again if payment was successful.';
-          }
-        }
-      }, 3000);
-    },
-
-    clearPolling() {
-      if (this.mpesaPollingTimer) {
-        clearInterval(this.mpesaPollingTimer);
-        this.mpesaPollingTimer = null;
-      }
-    },
-
-    async onPaymentSuccess() {
-      try {
-        const updatedBill = await api.put(`/bills/${this.mpesaBill.id}`, {
-          ...this.mpesaBill,
-          status: 'paid'
-        });
-        const index = this.bills.findIndex(b => b.id === this.mpesaBill.id);
-        if (index !== -1) {
-          this.bills[index] = {...this.bills[index], status: 'paid' };
-        }
-        await api.post('/expenses', {
-          name: this.getBillName(this.mpesaBill),
-          amount: this.mpesaBill.amount,
-          date: new Date().toISOString().split('T')[0],
-          category: 'Bills',
-          bill_id: this.mpesaBill.id,
-          payment_method: 'mpesa',
-          notes: `Paid via M-Pesa from ${this.mpesaPhone}`
-        });
-        this.mpesaStatus = 'success';
-        this.showToast(`${this.getBillName(this.mpesaBill)} paid successful via M-Pesa.`);
-      } catch (error) {
-        console.error('Post payment update error:', error);
-        this.mpesaStatus = 'success';
-        this.showToast('Payment was received! Note: expense record may need manual sync.', 'error');
-      }
-    },
-
-    async recheckPayment() {
-      try {
-        const response = await api.get(`/mpesa/status/${this.mpesaCheckoutRequestId}`);
-        const status = response.data.status;
-        if (status === 'success') {
-          await this.onPaymentSuccess();
-        } else {
-          this.showToast('Payment has not been confirmed yet. Check your messages.', 'error');
-        }
-      } catch (error) {
-        console.error('Error rechecking payment:', error);
-        this.showToast('Failed to recheck payment status. Please try again.', 'error');
+    } catch {
+      if (attempts >= maxAttempts) {
+        clearPolling();
+        mpesaStatus.value = 'failed';
+        mpesaErrorMessage.value = 'Payment confirmation timed out. Please check your phone and try again.';
       }
     }
+  }, 3000);
+}
+
+function clearPolling() {
+  if (mpesaPollingTimer.value) {
+    clearInterval(mpesaPollingTimer.value);
+    mpesaPollingTimer.value = null;
+  }
+}
+
+async function onPaymentSuccess() {
+  try {
+    await api.put(`/bills/${mpesaBill.value.id}`, { ...mpesaBill.value, status: 'paid' });
+    const index = bills.value.findIndex(b => b.id === mpesaBill.value.id);
+    if (index !== -1) bills.value[index] = { ...bills.value[index], status: 'paid' };
+    await api.post('/expenses', {
+      name: getBillName(mpesaBill.value),
+      amount: mpesaBill.value.amount,
+      date: new Date().toISOString().split('T')[0],
+      category: 'Bills',
+      bill_id: mpesaBill.value.id,
+      payment_method: 'mpesa',
+      notes: `Paid via M-Pesa from ${mpesaPhone.value}`,
+    });
+    mpesaStatus.value = 'success';
+    showToast(`${getBillName(mpesaBill.value)} paid successfully via M-Pesa.`);
+  } catch {
+    mpesaStatus.value = 'success';
+    showToast('Payment received! Note: expense record may need manual sync.', 'error');
+  }
+}
+
+async function recheckPayment() {
+  if (recheckingPayment.value) return;
+  recheckingPayment.value = true;
+  try {
+    const response = await api.get(`/mpesa/status/${mpesaCheckoutRequestId.value}`);
+    if (response.data.status === 'success') {
+      await onPaymentSuccess();
+    } else {
+      showToast('Payment has not been confirmed yet. Check your messages.', 'error');
+    }
+  } catch {
+    showToast('Failed to recheck payment status. Please try again.', 'error');
+  } finally {
+    recheckingPayment.value = false;
   }
 }
 </script>

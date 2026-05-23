@@ -128,7 +128,6 @@ const fetchItems = async () => {
         }
         items.value = Array.isArray(itemsData) ? itemsData : [];
     } catch (error) {
-        console.error('Error fetching items:', error);
         showToast('Failed to load items. Please try again.', 'error');
         items.value = [];
     } finally {
@@ -164,7 +163,6 @@ const saveItem = async () => {
             showToast('Item added successfully');
         }
     } catch (error) {
-        console.error('Error saving item:', error);
         if (error.response?.data?.errors) {
             errors.value = error.response.data.errors;
             showToast('Please fill in the form correctly', 'error');
@@ -183,7 +181,6 @@ const deleteItem = async () => {
         closeDeleteModal();
         showToast('Item deleted successfully');
     } catch (error) {
-        console.error('Error deleting item:', error);
         showToast(error.response?.data?.message || 'Failed to delete item', 'error');
     }
 }

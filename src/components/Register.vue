@@ -2,6 +2,11 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import {
+  validateEmail, validateName,
+  getPasswordStrength, passwordStrengthLabel, passwordStrengthColor,
+  passwordsMatch as checkPasswordsMatch,
+} from '../utils/validation';
 
 const router = useRouter();
 
@@ -24,71 +29,39 @@ const currentStep = ref(1);
 const steps = ['Personal Info', 'Security'];
 const roles = ['User', 'Admin'];
 
-const passwordsMatch = computed(() => {
-  return form.value.password && form.value.password_confirmation && 
-         form.value.password === form.value.password_confirmation;
-});
+const doPasswordsMatch = computed(() =>
+  checkPasswordsMatch(form.value.password, form.value.password_confirmation)
+);
 
-const passwordStrength = computed(() => {
-  const pwd = form.value.password;
-  if (!pwd) return 0;
-  
-  let score = 0;
-  if (pwd.length >= 8) score++;
-  if (/[A-Z]/.test(pwd)) score++;
-  if (/[0-9]/.test(pwd)) score++;
-  if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  
-  return score;
-});
-
-const strengthLabel = computed(() => {
-  const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-  return labels[passwordStrength.value];
-});
-
-const getStrengthColor = () => {
-  const colors = ['#ff4444', '#ff8844', '#ffcc00', '#44cc44', '#00aa00'];
-  return colors[passwordStrength.value];
-};
+const passwordStrength = computed(() => getPasswordStrength(form.value.password));
+const strengthLabel = computed(() => passwordStrengthLabel(passwordStrength.value));
+const getStrengthColor = () => passwordStrengthColor(passwordStrength.value);
 
 const nextStep = () => {
-  if (validateStep1()) {
-    currentStep.value++;
-  }
+  if (validateStep1()) currentStep.value++;
 };
 
 const prevStep = () => {
-  if (currentStep.value > 1) {
-    currentStep.value--;
-  }
+  if (currentStep.value > 1) currentStep.value--;
 };
 
 const validateStep1 = () => {
   const stepErrors = {};
-  
-  if (!form.value.name) {
-    stepErrors.name = ['Name is required'];
-  } else if (form.value.name.length < 2) {
-    stepErrors.name = ['Name must be at least 2 characters'];
-  }
-  
-  if (!form.value.email) {
-    stepErrors.email = ['Email is required'];
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    stepErrors.email = ['Please enter a valid email address'];
-  }
-  
-  if (!form.value.role) {
-    stepErrors.role = ['Please select a role'];
-  }
-  
+
+  const nameError = validateName(form.value.name);
+  if (nameError) stepErrors.name = [nameError];
+
+  const emailError = validateEmail(form.value.email);
+  if (emailError) stepErrors.email = [emailError];
+
+  if (!form.value.role) stepErrors.role = ['Please select a role'];
+
   errors.value = stepErrors;
   return Object.keys(stepErrors).length === 0;
 };
 
 const handleSubmit = async () => {
-  if (!passwordsMatch.value) {
+  if (!doPasswordsMatch.value) {
     errors.value.password_confirmation = ['Passwords do not match'];
     return;
   }
@@ -117,7 +90,6 @@ const handleSubmit = async () => {
       router.push('/login');
     }
   } catch (err) {
-    console.error('Registration error:', err);
     
     if (err.response?.status === 422) {
       errors.value = err.response.data.errors || {};
@@ -315,8 +287,8 @@ const handleSubmit = async () => {
                   :type="showConfirm ? 'text' : 'password'"
                   class="form-input"
                   :class="{ 
-                    'is-valid': form.password_confirmation && passwordsMatch,
-                    'is-invalid': form.password_confirmation && !passwordsMatch
+                    'is-valid': form.password_confirmation && doPasswordsMatch,
+                    'is-invalid': form.password_confirmation && !doPasswordsMatch
                   }"
                   placeholder="Confirm your password"
                 />
@@ -326,9 +298,9 @@ const handleSubmit = async () => {
               </div>
               
               <!-- Password Match Indicator -->
-              <div v-if="form.password_confirmation" class="password-match" :class="{ 'match-success': passwordsMatch }">
-                <span class="match-icon">{{ passwordsMatch ? '✓' : '⚠️' }}</span>
-                <span>{{ passwordsMatch ? 'Passwords match' : 'Passwords do not match' }}</span>
+              <div v-if="form.password_confirmation" class="password-match" :class="{ 'match-success': doPasswordsMatch }">
+                <span class="match-icon">{{ doPasswordsMatch ? '✓' : '⚠️' }}</span>
+                <span>{{ doPasswordsMatch ? 'Passwords match' : 'Passwords do not match' }}</span>
               </div>
             </div>
 
@@ -349,7 +321,7 @@ const handleSubmit = async () => {
               <button 
                 type="submit" 
                 class="btn btn-primary" 
-                :disabled="loading || !agreed || !passwordsMatch"
+                :disabled="loading || !agreed || !doPasswordsMatch"
               >
                 <span v-if="!loading">Create Account →</span>
                 <div v-else class="spinner">

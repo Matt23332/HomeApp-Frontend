@@ -3,6 +3,10 @@ import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import { useRouter } from 'vue-router';
+import {
+  getPasswordStrength, passwordStrengthLabel,
+  passwordsMatch as checkPasswordsMatch,
+} from '../utils/validation';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -13,6 +17,7 @@ const editMode = ref(false);
 const activeTab = ref('personal');
 const avatarPreview = ref(null);
 const avatarInput = ref(null);
+const avatarUploading = ref(false);
 const showDeleteConfirm = ref(false);
 const deleteConfirmText = ref('');
 
@@ -28,7 +33,8 @@ const toast = ref({
 
 const userData = ref({
     name: '',
-    email: ''
+    email: '',
+    avatar_url: null,
 });
 
 const passwordData = ref({
@@ -69,26 +75,11 @@ const isProfileComplete = computed(() => {
     return userData.value.name && userData.value.email;
 });
 
-const passwordStrength = computed(() => {
-    const password = passwordData.value.password;
-    if (!password) return 0;
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    return strength;
-});
-
-const strengthText = computed(() => {
-    const texts = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-    return texts[passwordStrength.value];
-});
-
-const passwordsMatch = computed(() => {
-    return passwordData.value.password && passwordData.value.password_confirmation && passwordData.value.password === passwordData.value.password_confirmation;
-});
+const passwordStrength = computed(() => getPasswordStrength(passwordData.value.password));
+const strengthText = computed(() => passwordStrengthLabel(passwordStrength.value));
+const passwordsMatch = computed(() =>
+    checkPasswordsMatch(passwordData.value.password, passwordData.value.password_confirmation)
+);
 
 const showToast = (message, type = 'success') => {
     toast.value = { show: true, message, type };
@@ -101,15 +92,34 @@ const triggerAvatarUpload = () => {
     avatarInput.value.click();
 }
 
-const handleAvatarUpload = (event) => {
+const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            avatarPreview.value = e.target.result;
+    if (!file) return;
+
+    // Show local preview immediately for instant feedback
+    const reader = new FileReader();
+    reader.onload = (e) => { avatarPreview.value = e.target.result; };
+    reader.readAsDataURL(file);
+
+    avatarUploading.value = true;
+    try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        const response = await api.post('/user/avatar', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const url = response.data.avatar_url || response.data.data?.avatar_url;
+        if (url) {
+            avatarPreview.value = url;
+            userData.value.avatar_url = url;
         }
-        reader.readAsDataURL(file);
         showToast('Profile picture updated!');
+    } catch (error) {
+        showToast(error.response?.data?.message || 'Failed to upload avatar', 'error');
+        avatarPreview.value = userData.value.avatar_url || null;
+    } finally {
+        avatarUploading.value = false;
+        if (avatarInput.value) avatarInput.value.value = '';
     }
 }
 
@@ -118,14 +128,17 @@ const fetchUserData = async () => {
         const response = await api.get('/user');
         userData.value.name = response.data.name;
         userData.value.email = response.data.email;
+        userData.value.avatar_url = response.data.avatar_url || null;
+        if (userData.value.avatar_url) avatarPreview.value = userData.value.avatar_url;
 
         authStore.user = response.data;
         localStorage.setItem('user', JSON.stringify(response.data));
-    } catch (error) {
-        console.error('Error fetching user data:', error);
+    } catch {
         if (authStore.user) {
             userData.value.name = authStore.user.name;
             userData.value.email = authStore.user.email;
+            userData.value.avatar_url = authStore.user.avatar_url || null;
+            if (userData.value.avatar_url) avatarPreview.value = userData.value.avatar_url;
         }
     }
 }
@@ -138,14 +151,12 @@ const updateProfile = async () => {
             email: userData.value.email
         });
 
-        console.log('Profile update response:', response.data);
 
         authStore.user = response.data.user || response.data;
         localStorage.setItem('user', JSON.stringify(authStore.user));
         showToast('Profile updated successfully!');
         editMode.value = false;
     } catch (error) {
-        console.error('Error updating profile:', error.response);
         showToast(error.response?.data?.message || 'Failed to update profile', 'error');
     } finally {
         loading.value = false;
@@ -173,7 +184,6 @@ const changePassword = async () => {
             password_confirmation: ''
         }
     } catch (error) {
-        console.error('Error changing password:', error);
         showToast(error.response?.data?.message || 'Failed to change password', 'error');
     } finally {
         changingPassword.value = false;
@@ -185,7 +195,6 @@ const fetchSessions = async () => {
         const response = await api.get('/user/sessions');
         activeSessions.value = response.data.sessions || [];
     } catch (error) {
-        console.error('Error fetching sessions:', error);
         activeSessions.value = [
             {
                 id: 1,
@@ -204,7 +213,6 @@ const revokeSession = async (sessionId) => {
         showToast('Session revoked successfully!');
         await fetchSessions();
     } catch (error) {
-        console.error('Error revoking session:', error);
         showToast(error.response?.data?.message || 'Failed to revoke session', 'error');
     }
 }
@@ -215,7 +223,6 @@ const revokeAllSessions = async () => {
         showToast('All sessions revoked successfully!');
         await fetchSessions();
     } catch (error) {
-        console.error('Error revoking all sessions:', error);
         showToast(error.response?.data?.message || 'Failed to revoke sessions', 'error');
     }
 }
@@ -229,7 +236,6 @@ const deleteAccount = async () => {
         authStore.logout();
         router.push('/login');
     } catch (error) {
-        console.error('Error deleting account:', error);
         showToast(error.response?.data?.message || 'Failed to delete account', 'error');
     }
 }
@@ -254,10 +260,11 @@ onMounted(() => {
                 <div class="profile-avatar-section">
                     <div class="avatar-wrapper">
                         <div class="avatar" :style="{ backgroundColor: avatarColor }">
-                            <span v-if="!avatarPreview">{{ userInitials }}</span>
+                            <span v-if="avatarUploading" class="avatar-uploading">⏳</span>
+                            <span v-else-if="!avatarPreview">{{ userInitials }}</span>
                             <img v-else :src="avatarPreview" alt="Avatar" class="avatar-image">
-                            <button class="edit-avatar-btn" @click="triggerAvatarUpload">
-                                📷
+                            <button class="edit-avatar-btn" @click="triggerAvatarUpload" :disabled="avatarUploading" :title="avatarUploading ? 'Uploading...' : 'Change photo'">
+                                {{ avatarUploading ? '⏳' : '📷' }}
                             </button>
                         </div>
                         <input type="file" ref="avatarInput" accept="image/*" style="display: none"

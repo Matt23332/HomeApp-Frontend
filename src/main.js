@@ -31,6 +31,18 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 
+app.directive('click-outside', {
+  mounted(el, binding) {
+    el._clickOutsideHandler = (event) => {
+      if (!el.contains(event.target)) binding.value(event);
+    };
+    document.addEventListener('click', el._clickOutsideHandler);
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el._clickOutsideHandler);
+  },
+});
+
 app.use(createPinia())
 app.use(router)
 app.use(vuetify)

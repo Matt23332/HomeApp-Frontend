@@ -92,7 +92,6 @@ const loadExpenses = async () => {
         const response = await api.get('/expenses');
         expenses.value = response.data.data || response.data
     } catch (error) {
-        console.error('Error loading expenses:', error);
         showToast('Failed to load expenses', 'error');
     } finally {
         loadingExpenses.value = false;
@@ -104,7 +103,6 @@ const loadBills = async () => {
         const response = await api.get('/bills');
         bills.value = response.data.data || response.data
     } catch (error) {
-        console.error('Error loading bills:', error);
         showToast('Failed to load bills', 'error');
     }
 }
@@ -119,7 +117,6 @@ const loadSummary = async () => {
         await nextTick();
         updateChart();
     } catch (error) {
-        console.error('Error loading summary:', error);
         showToast('Failed to load summary', 'error');
     } finally {
         loadingSummary.value = false;
@@ -150,7 +147,6 @@ const payBillAndCreateExpense = async () => {
             await Promise.all([loadExpenses(), loadBills(), loadSummary()]);
         }
     } catch (error) {
-        console.error('Error paying bill: ', error);
         showToast(error.response?.data?.message || 'Failed to process bill payment', 'error');
     } finally {
         isProcessing.value = false;
@@ -183,7 +179,6 @@ const createManualExpense = async () => {
             showToast('Expense added successfully');
         }
     } catch (error) {
-        console.error('Error creating expense: ', error);
         showToast(error.response?.data?.message || 'Failed to create expense', 'error');
     }
 }
@@ -204,7 +199,6 @@ const updateExpense = async () => {
             closeEditModal();
         }
     } catch (error) {
-        console.error('Error updating expense: ', error);
         showToast(error.response?.data?.message || 'Failed to update expense', 'error');
     }
 }
@@ -216,7 +210,6 @@ const deleteExpense = async (id) => {
             showToast('Expense deleted successfully');
             await Promise.all([loadExpenses(), loadSummary()]);
         } catch (error) {
-            console.error('Error deleting expense: ', error);
             showToast(error.response?.data?.message || 'Failed to delete expense', 'error');
         }
     }
