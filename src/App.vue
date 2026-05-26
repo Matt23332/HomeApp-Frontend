@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView, useRoute } from 'vue-router';
-import { computed, watch, onMounted, onUnmounted } from 'vue';
+import { computed, watch, onUnmounted } from 'vue';
 import Navbar from './components/Navbar.vue';
 
 const route = useRoute();
@@ -66,6 +66,8 @@ html, body, #app, .v-application {
 
 .main-content.has-navbar {
   margin-top: 70px;
+  background: #f8fafc;
+  min-height: 100vh;
 }
 
 /* Responsive adjustments */
