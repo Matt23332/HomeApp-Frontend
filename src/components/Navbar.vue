@@ -3,16 +3,17 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useNotifications } from '@/composables/useNotifications';
 
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead } = useNotifications();
 
 const isScrolled = ref(false);
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
 const notificationsOpen = ref(false);
-const unreadCount = ref(3);
 const user = computed (() => auth.user);
 
 const navigationItems = ref([
@@ -22,33 +23,6 @@ const navigationItems = ref([
     { name: 'Shopping', path: '/shopping-items', icon: '🛒' },
     { name: 'Reports', path: '/reports', icon: '📈' },
     { name: 'Payments', path: '/payments', icon: '💳' },
-]);
-
-const notifications = ref([
-    {
-        id: 1,
-        title: 'Bill Reminder',
-        message: 'Electricity bill is due in 2 days', 
-        icon: '⚡',
-        read: false,
-        created_at: new Date(Date.now() - 1000 * 60 * 30)
-    },
-    {
-        id: 2,
-        title: 'Payment Confirmed',
-        message: 'Your payment has been recieved.',
-        icon: '✅',
-        read: false,
-        created_at: new Date(Date.now() - 1000 * 60 * 60 * 2)
-    },
-    {
-        id: 3,
-        title: 'Budget Alert',
-        message: 'You have used 60% of your total budget this month',
-        icon: '⚠️',
-        read: true,
-        created_at: new Date(Date.now() - 1000 * 60 * 60 * 24)
-    }
 ]);
 
 const userAvatarColor = computed(() => {
@@ -120,15 +94,13 @@ const closeNotifications = () => {
     notificationsOpen.value = false;
 }
 
-const markAllAsRead = () => {
-    notifications.value.forEach(notif => notif.read = true);
-    unreadCount.value = 0;
+const markAllRead = () => {
+    markAllAsRead();
 }
 
 const handleNotificationClick = (notification) => {
     if (!notification.read) {
-        notification.read = true;
-        unreadCount.value--;
+        markAsRead(notification.id);
     }
 
     if (notification.title === 'Bill Reminder') {
@@ -162,6 +134,7 @@ const handleOutsideClick = (event) => {
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('mousedown', handleScroll);
+    fetchNotifications();
 });
 
 onUnmounted(() => {
@@ -204,7 +177,7 @@ onUnmounted(() => {
                         <div v-if="notificationsOpen" class="dropdown-menu notifications-menu">
                             <div class="dropdown-header">
                                 <h4>Notifications</h4>
-                                <button class="mark-all-btn" @click="markAllAsRead">Mark All Read</button>
+                                <button class="mark-all-btn" @click="markAllRead">Mark All Read</button>
                             </div>
                             <div class="dropdown-content">
                                 <div v-if="notifications.length === 0" class="empty-state">
