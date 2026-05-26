@@ -1,10 +1,14 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import NotificationBell from '../components/NotificationBell.vue';
+import ToastContainer from '../components/ToastContainer.vue';
+import { useNotifications } from '@/composables/useNotifications';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
 import Chart from 'chart.js/auto';
 
+const { addToast, addNotification } = useNotifications();
 const authStore = useAuthStore();
 const router = useRouter();
 
@@ -66,7 +70,7 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 }
 
-const getProgressIndicator = (percentage) => {
+const getProgressColor = (percentage) => {
   if (percentage >= 50) return '#10b981';
   if (percentage >= 80) return '#f59e0b';
   return '#ef4444';
@@ -98,8 +102,8 @@ const fetchDashboardData = async () => {
 
     summary.value = data.summary ?? summary.value;
     userData.value = data.user ?? userData.value;
-    recentTransactions.value = data.recent_transactions ?? [];
-    upcomingBills.value = data.upcoming_bills ?? [];
+    recentTransactions.value = (data.recent_transactions ?? []).filter(Boolean);
+    upcomingBills.value = (data.upcoming_bills ?? []).filter(Boolean);
     shoppingItems.value = data.shopping_list ?? [];
     budgets.value = data.budgets ?? [];
     expenseBreakdown.value = data.expense_breakdown ?? [];
@@ -108,6 +112,7 @@ const fetchDashboardData = async () => {
       initExpenseChart();
     }, 100);
   } catch (error) {
+    addToast({ type: 'error', title: 'Failed to fetch dashboard data', message: 'Please try again later.' });
   } finally {
     loading.value = false;
   }
@@ -123,6 +128,7 @@ const togglePurchase = async (item) => {
     refreshData();
   } catch (error) {
     item.purchased = !item.purchased;
+    addToast({ type: 'error', title: 'Failed to update purchase status', message: 'Please try again later.' });
   }
 }
 
@@ -130,6 +136,7 @@ const addExpense = async () => {
   submitting.value = true;
   try {
     await api.post('/expenses', newExpense.value);
+    addToast({ type: 'success', title: 'Expense added successfully!', message: `${newExpense.value.title} saved.` });
     showExpenseModal.value = false;
     newExpense.value = {
       title: '',
@@ -140,6 +147,7 @@ const addExpense = async () => {
 
     await fetchDashboardData();
   } catch (error) {
+    addToast({ type: 'error', title: 'Failed to add expense', message: 'Please try again later.' });
   } finally {
     submitting.value = false;
   }
@@ -154,6 +162,7 @@ const generateReport = async () => {
       }
     });
   } catch (error) {
+    addToast({ type: 'error', title: 'Failed to generate report', message: 'Please try again later.' });
   }
 }
 
@@ -172,6 +181,7 @@ const exportData = async () => {
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
+    addToast({ type: 'error', title: 'Failed to export data', message: 'Please try again later.' });
   }
 }
 
@@ -549,6 +559,7 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
+  <ToastContainer />
 </template>
 
 <style scoped>

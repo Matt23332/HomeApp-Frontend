@@ -43,6 +43,7 @@ const selectedBill = computed(() => {
 
 const filteredExpenses = computed(() => {
     if (!expenses.value) return [];
+    const valid = expenses.value.filter(Boolean);
     if (!searchQuery.value) return expenses.value;
     return expenses.value.filter(expense =>
         (expense.description || expense.title || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || (expense.category || '').toLowerCase().includes(searchQuery.value.toLocaleLowerCase())
@@ -90,7 +91,7 @@ const loadExpenses = async () => {
     loadingExpenses.value = true;
     try {
         const response = await api.get('/expenses');
-        expenses.value = response.data.data || response.data
+        expenses.value = (response.data.data ?? response.data).filter(Boolean);
     } catch (error) {
         showToast('Failed to load expenses', 'error');
     } finally {
@@ -101,7 +102,7 @@ const loadExpenses = async () => {
 const loadBills = async () => {
     try {
         const response = await api.get('/bills');
-        bills.value = response.data.data || response.data
+        bills.value = (response.data.data ?? response.data).filter(Boolean);
     } catch (error) {
         showToast('Failed to load bills', 'error');
     }
