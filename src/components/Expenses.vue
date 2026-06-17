@@ -46,7 +46,7 @@ const filteredExpenses = computed(() => {
     const valid = expenses.value.filter(Boolean);
     if (!searchQuery.value) return expenses.value;
     return expenses.value.filter(expense =>
-        (expense.description || expense.title || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || (expense.category || '').toLowerCase().includes(searchQuery.value.toLocaleLowerCase())
+        (expense.title || '').toLowerCase().includes(searchQuery.value.toLowerCase()) || (expense.category || '').toLowerCase().includes(searchQuery.value.toLocaleLowerCase())
     );
 })
 
@@ -67,13 +67,14 @@ const formatDate = (date) => {
 
 const getCategoryClass = (category) => {
     const classes = {
-        'Bills': 'category-primary',
-        'Rent': 'category-info',
-        'Utilities': 'category-secondary',
         'Groceries': 'category-success',
-        'Transportation': 'category-warning',
+        'Food': 'category-warning',
+        'Transportation': 'category-info',
         'Entertainment': 'category-danger',
-        'Healthcare': 'category-dark',
+        'Utilities': 'category-secondary',
+        'Health': 'category-dark',
+        'Dining': 'category-primary',
+        'Education': 'category-light',
         'Shopping': 'category-light',
         'Other': 'category-muted'
     }
@@ -91,7 +92,7 @@ const loadExpenses = async () => {
     loadingExpenses.value = true;
     try {
         const response = await api.get('/expenses');
-        expenses.value = (response.data.data ?? response.data).filter(Boolean);
+        expenses.value = (response.data.data?.data ?? response.data.data ?? response.data).filter(Boolean);
     } catch (error) {
         showToast('Failed to load expenses', 'error');
     } finally {
@@ -102,7 +103,7 @@ const loadExpenses = async () => {
 const loadBills = async () => {
     try {
         const response = await api.get('/bills');
-        bills.value = (response.data.data ?? response.data).filter(Boolean);
+        bills.value = (response.data.data?.data ?? response.data.data ?? response.data).filter(Boolean);
     } catch (error) {
         showToast('Failed to load bills', 'error');
     }
@@ -267,7 +268,7 @@ const updateChart = () => {
 const editExpense = (expense) => {
     editingExpense.value = {
         id: expense.id,
-        title: expense.description || expense.title,
+        title: expense.title,
         amount: expense.amount,
         category: expense.category,
         expense_date: expense.expense_date
@@ -287,7 +288,7 @@ const resetForm = () => {
     expenseData.value = {
         title: '',
         amount: '',
-        category: 'Bills',
+        category: 'Other',
         expense_date: new Date().toISOString().split('T')[0]
     }
 }
@@ -347,13 +348,14 @@ onUnmounted(() => {
                                 <label class="form-label">Expense Category</label>
                                 <select v-model="expenseData.category" class="form-control" required>
                                     <option value="">Select Category</option>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Rent">Rent</option>
-                                    <option value="Utilities">Utilities</option>
                                     <option value="Groceries">Groceries</option>
+                                    <option value="Food">Food</option>
                                     <option value="Transportation">Transportation</option>
                                     <option value="Entertainment">Entertainment</option>
-                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Dining">Dining</option>
+                                    <option value="Education">Education</option>
                                     <option value="Shopping">Shopping</option>
                                     <option value="Other">Other</option>
                                 </select>
@@ -396,13 +398,14 @@ onUnmounted(() => {
                                 <label class="form-label">Category</label>
                                 <select v-model="manualExpense.category" class="form-control" required>
                                     <option value="">Select Category</option>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Rent">Rent</option>
-                                    <option value="Utilities">Utilities</option>
                                     <option value="Groceries">Groceries</option>
+                                    <option value="Food">Food</option>
                                     <option value="Transportation">Transportation</option>
                                     <option value="Entertainment">Entertainment</option>
-                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Dining">Dining</option>
+                                    <option value="Education">Education</option>
                                     <option value="Shopping">Shopping</option>
                                     <option value="Other">Other</option>
                                 </select>
@@ -482,7 +485,7 @@ onUnmounted(() => {
                                 </thead>
                                 <tbody>
                                     <tr v-for="expense in filteredExpenses" :key="expense.id">
-                                        <td class="fw-medium">{{ expense.description || expense.title }}</td>
+                                        <td class="fw-medium">{{ expense.title }}</td>
                                         <td class="text-primary fw-bold">Ksh{{ formatAmount(expense.amount) }}</td>
                                         <td>
                                             <span class="category-badge" :class="getCategoryClass(expense.category)">
@@ -537,13 +540,14 @@ onUnmounted(() => {
                             <div class="form-group mb-3">
                                 <label class="form-label">Category</label>
                                 <select v-model="editingExpense.category" class="form-control" required>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Rent">Rent</option>
-                                    <option value="Utilities">Utilities</option>
                                     <option value="Groceries">Groceries</option>
+                                    <option value="Food">Food</option>
                                     <option value="Transportation">Transportation</option>
                                     <option value="Entertainment">Entertainment</option>
-                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Utilities">Utilities</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Dining">Dining</option>
+                                    <option value="Education">Education</option>
                                     <option value="Shopping">Shopping</option>
                                     <option value="Other">Other</option>
                                 </select>

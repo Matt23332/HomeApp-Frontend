@@ -129,6 +129,13 @@
       </div>
     </div>
 
+    <!-- Load More -->
+    <div v-if="pagination.currentPage < pagination.lastPage" class="load-more-wrap">
+      <button @click="loadMore" class="btn btn-secondary" :disabled="loadingMore">
+        {{ loadingMore ? 'Loading...' : `Load More (${bills.length} of ${pagination.total})` }}
+      </button>
+    </div>
+
     <!-- Bill Form Modal (Create/Edit) -->
     <div v-if="showFormModal" class="modal" @click.self="closeFormModal">
       <div class="modal-content modal-large">
@@ -208,7 +215,7 @@
         <div class="modal-header mpesa-header">
           <div class="mpesa-title-row">
             <div class="mpesa-badge">M-Pesa</div>
-            <h2>Pay Bill: {{ billToPay ? getBillName(billToPay) : '' }}</h2>
+            <h2>Pay Bill: {{ mpesaBill ? getBillName(mpesaBill) : '' }}</h2>
           </div>
           <button class="close-btn" @click="closeMpesaModal" :disabled="mpesaStatus === 'pending'">&times;</button>
         </div>
@@ -315,6 +322,8 @@ import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import api from '../services/api';
 
 const bills = ref([]);
+const pagination = reactive({ currentPage: 1, lastPage: 1, total: 0 });
+const loadingMore = ref(false);
 const loading = ref(false);
 const saving = ref(false);
 const showFormModal = ref(false);
@@ -471,18 +480,38 @@ function getBillIcon(bill) {
   return '📄';
 }
 
-async function fetchBills() {
-  loading.value = true;
+async function fetchBills(page = 1) {
+  if (page === 1) {
+    loading.value = true;
+  } else {
+    loadingMore.value = true;
+  }
   try {
-    const response = await api.get('/bills');
-    let data = response.data;
-    if (data && data.data) data = data.data;
-    bills.value = Array.isArray(data) ? data : [];
+    const response = await api.get('/bills', { params: { page } });
+    const wrapper = response.data.data;
+    const items = Array.isArray(wrapper) ? wrapper : (wrapper?.data ?? []);
+    if (page === 1) {
+      bills.value = items;
+    } else {
+      bills.value.push(...items);
+    }
+    if (wrapper && !Array.isArray(wrapper)) {
+      pagination.currentPage = wrapper.current_page ?? 1;
+      pagination.lastPage = wrapper.last_page ?? 1;
+      pagination.total = wrapper.total ?? items.length;
+    }
   } catch {
     showToast('Failed to load bills', 'error');
-    bills.value = [];
+    if (page === 1) bills.value = [];
   } finally {
     loading.value = false;
+    loadingMore.value = false;
+  }
+}
+
+async function loadMore() {
+  if (pagination.currentPage < pagination.lastPage) {
+    await fetchBills(pagination.currentPage + 1);
   }
 }
 
@@ -624,7 +653,17 @@ async function initiateMpesaPayment() {
       account_reference: getBillName(mpesaBill.value),
       transaction_desc: `Payment for ${getBillName(mpesaBill.value)}`,
     });
-    mpesaCheckoutRequestId.value = response.data.mpesaCheckoutRequestID || response.data.checkout_request_id;
+    mpesaCheckoutRequestId.value =
+      response.data.mpesaCheckoutRequestID ||
+      response.data.checkout_request_id ||
+      response.data.data?.checkout_request_id ||
+      response.data.data?.CheckoutRequestID ||
+      response.data.CheckoutRequestID;
+    if (!mpesaCheckoutRequestId.value) {
+      mpesaStatus.value = 'failed';
+      mpesaErrorMessage.value = 'Payment initiation failed: no checkout ID received from server.';
+      return;
+    }
     startPolling();
   } catch (error) {
     mpesaStatus.value = 'failed';
@@ -672,14 +711,14 @@ function clearPolling() {
 
 async function onPaymentSuccess() {
   try {
-    await api.put(`/bills/${mpesaBill.value.id}`, { ...mpesaBill.value, status: 'paid' });
+    await api.patch(`/bills/${mpesaBill.value.id}/mark-as-paid`);
     const index = bills.value.findIndex(b => b.id === mpesaBill.value.id);
     if (index !== -1) bills.value[index] = { ...bills.value[index], status: 'paid' };
     await api.post('/expenses', {
-      name: getBillName(mpesaBill.value),
+      title: getBillName(mpesaBill.value),
       amount: mpesaBill.value.amount,
-      date: new Date().toISOString().split('T')[0],
-      category: 'Bills',
+      expense_date: new Date().toISOString().split('T')[0],
+      category: 'Other',
       bill_id: mpesaBill.value.id,
       payment_method: 'mpesa',
       notes: `Paid via M-Pesa from ${mpesaPhone.value}`,
@@ -1216,6 +1255,13 @@ async function recheckPayment() {
 
 .mpesa-success .result-icon {
   filter: none;
+}
+
+/* Load More */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
 }
 
 /* Loading State */
