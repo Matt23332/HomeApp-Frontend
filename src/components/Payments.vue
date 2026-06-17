@@ -414,9 +414,8 @@ const fetchPayments = async () => {
   error.value = null;
   try {
     const response = await api.get('/payments');
-    let data = response.data;
-    if (data && data.data) data = data.data;
-    payments.value = Array.isArray(data) ? data : [];
+    const paymentsData = response.data?.data?.data ?? response.data?.data ?? response.data;
+    payments.value = Array.isArray(paymentsData) ? paymentsData : [];
   } catch (err) {
     console.error('Error fetching payments:', err);
     error.value = err.response?.data?.message || 'Could not load payment history. Please try again.';

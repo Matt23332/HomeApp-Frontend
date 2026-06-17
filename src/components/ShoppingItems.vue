@@ -93,7 +93,7 @@ const getItemStatusClass = (status) => {
     return {
         'status-pending': status === 'pending',
         'status-purchased': status === 'purchased',
-        'status-cancelled': status === 'cancelled'
+        'status-completed': status === 'completed'
     }
 }
 
@@ -101,7 +101,7 @@ const getStatusText = (status) => {
     const statusMap = {
         'pending': 'Pending',
         'purchased': 'Purchased',
-        'cancelled': 'Cancelled'
+        'completed': 'Completed'
     }
     return statusMap[status] || status;
 }
@@ -122,10 +122,7 @@ const fetchItems = async () => {
     loading.value = true;
     try {
         const response = await api.get('/shopping-items');
-        let itemsData = response.data;
-        if (itemsData && itemsData.data) {
-            itemsData = itemsData.data;
-        }
+        const itemsData = response.data?.data?.data ?? response.data?.data ?? response.data;
         items.value = Array.isArray(itemsData) ? itemsData : [];
     } catch (error) {
         showToast('Failed to load items. Please try again.', 'error');
@@ -302,7 +299,7 @@ onMounted(() => {
                 <option value="all">All Items</option>
                 <option value="pending">Pending</option>
                 <option value="purchased">Purchased</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
             </select>
         </div>
         <div v-if="loading" class="loading-state">
@@ -392,7 +389,7 @@ onMounted(() => {
                         <select id="status" v-model="form.status" :class="{ 'error': errors.status }">
                             <option value="pending">Pending</option>
                             <option value="purchased">Purchased</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="completed">Completed</option>
                         </select>
                     </div>
                     <div class="form-actions">
@@ -706,7 +703,7 @@ onMounted(() => {
   color: #10b981;
 }
 
-.status-cancelled {
+.status-completed {
   background: #fef2f2;
   color: #ef4444;
 }

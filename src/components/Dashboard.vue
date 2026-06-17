@@ -71,8 +71,8 @@ const formatDate = (dateString) => {
 }
 
 const getProgressColor = (percentage) => {
-  if (percentage >= 50) return '#10b981';
-  if (percentage >= 80) return '#f59e0b';
+  if (percentage < 50) return '#10b981';
+  if (percentage < 80) return '#f59e0b';
   return '#ef4444';
 }
 
@@ -104,7 +104,7 @@ const fetchDashboardData = async () => {
     userData.value = data.user ?? userData.value;
     recentTransactions.value = (data.recent_transactions ?? []).filter(Boolean);
     upcomingBills.value = (data.upcoming_bills ?? []).filter(Boolean);
-    shoppingItems.value = data.shopping_list ?? [];
+    shoppingItems.value = data.shopping_items ?? [];
     budgets.value = data.budgets ?? [];
     expenseBreakdown.value = data.expense_breakdown ?? [];
 
@@ -123,11 +123,13 @@ const refreshData = () => {
 }
 
 const togglePurchase = async (item) => {
+  const newStatus = item.status === 'purchased' ? 'pending' : 'purchased';
+  const oldStatus = item.status;
+  item.status = newStatus;
   try {
-    await api.post(`/shopping-items/${item.id}`, { purchased: item.purchased });
-    refreshData();
+    await api.put(`/shopping-items/${item.id}`, { status: newStatus });
   } catch (error) {
-    item.purchased = !item.purchased;
+    item.status = oldStatus;
     addToast({ type: 'error', title: 'Failed to update purchase status', message: 'Please try again later.' });
   }
 }
@@ -431,7 +433,7 @@ onUnmounted(() => {
           <div class="bills-list">
             <div v-for="bill in upcomingBills" :key="bill.id" class="bill-item">
               <div class="bill-info">
-                <div class="bill-name">{{ bill.name }}</div>
+                <div class="bill-name">{{ bill.title }}</div>
                 <div class="bill-due">Due: {{ formatDate(bill.due_date) }}</div>
               </div>
               <div class="bill-amount">${{ formatNumber(bill.amount) }}</div>
@@ -454,15 +456,15 @@ onUnmounted(() => {
           </div>
           <div class="shopping-list">
             <div v-for="item in shoppingItems" :key="item.id" class="shopping-item">
-              <input type="checkbox" v-model="item.purchased" @change="togglePurchase(item)"
+              <input type="checkbox" :checked="item.status === 'purchased'" @change="togglePurchase(item)"
                 class="shopping-checkbox" />
               <div class="shopping-info">
-                <div class="shopping-name" :class="{ purchased: item.purchased }">
-                  {{ item.item_name }}
+                <div class="shopping-name" :class="{ purchased: item.status === 'purchased' }">
+                  {{ item.name }}
                 </div>
                 <div class="shopping-category">{{ item.category || 'Uncategorized' }}</div>
               </div>
-              <div class="shopping-price">${{ formatNumber(item.estimated_price || 0) }}</div>
+              <div class="shopping-price">${{ formatNumber(item.price || 0) }}</div>
             </div>
             <div v-if="shoppingItems.length === 0" class="empty-state">
               <span>🛒</span>
