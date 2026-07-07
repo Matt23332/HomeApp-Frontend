@@ -15,6 +15,14 @@ import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 import * as labsComponents from 'vuetify/labs/components'
 
+// Resolve the user's saved theme preference once, at startup, so the whole
+// app (custom CSS + Vuetify) renders in the right theme on first paint.
+const savedTheme = localStorage.getItem('theme') || 'system'
+const resolvedTheme = savedTheme === 'system'
+  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  : savedTheme
+document.documentElement.setAttribute('data-theme', resolvedTheme)
+
 const vuetify = createVuetify({
   components: {
     ...components,
@@ -25,7 +33,7 @@ const vuetify = createVuetify({
     defaultSet: 'mdi', // This is already the default value - only for display purposes
   },
   theme: {
-    defaultTheme: 'dark',
+    defaultTheme: resolvedTheme,
   },
 })
 

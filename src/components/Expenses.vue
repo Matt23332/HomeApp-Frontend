@@ -244,7 +244,7 @@ const updateChart = () => {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#2c3e50',
+                            color: 'var(--text)',
                             font: { size: 12 }
                         }
                     },
@@ -588,7 +588,7 @@ onUnmounted(() => {
 }
 
 .text-muted {
-    color: #6c757d;
+    color: var(--text-muted);
 }
 
 .text-center {
@@ -601,8 +601,9 @@ onUnmounted(() => {
 
 .expense-manager {
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: var(--bg);
     min-height: 100vh;
+    transition: background-color 0.3s ease;
 }
 
 .table-responsive {
@@ -617,6 +618,8 @@ onUnmounted(() => {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     margin-bottom: 20px;
     transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--surface);
+    color: var(--text);
 }
 
 .card:hover {
@@ -624,14 +627,14 @@ onUnmounted(() => {
 }
 
 .card-header {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-bottom: 2px solid #e9ecef;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-muted) 100%);
+    border-bottom: 2px solid var(--border);
     padding: 1.25rem 1.5rem;
     border-radius: 12px 12px 0 0;
 }
 
 .card-header h4 {
-    color: #1a3a6f;
+    color: var(--text);
     font-weight: 600;
     font-size: 1.25rem;
 }
@@ -642,17 +645,29 @@ onUnmounted(() => {
 
 /* Form Controls */
 .form-label {
-    color: #2c3e50;
+    color: var(--text);
     font-weight: 500;
     margin-bottom: 0.5rem;
 }
 
 .form-control,
 .form-select {
-    border: 1px solid #d1d9e6;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 0.6rem 0.75rem;
     transition: all 0.2s;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+/* Native dropdown options render with OS colors; nudge them for dark mode */
+.form-select option {
+    background: var(--surface);
+    color: var(--text);
 }
 
 .form-control:focus,
@@ -721,7 +736,7 @@ onUnmounted(() => {
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: var(--text-muted);
     color: white;
     border: none;
     border-radius: 8px;
@@ -742,36 +757,44 @@ onUnmounted(() => {
     background-color: #e8f4f8;
     border: 1px solid #b8e0f0;
     border-radius: 8px;
-    color: #1a6b8a;
+    /* Fixed dark text: the background stays light-blue in both themes */
+    color: #0c5460;
 }
 
 /* Table Styling */
 .table {
     margin-bottom: 0;
+    /* Bootstrap 5 reads table colors from these vars — point them at our tokens */
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text);
+    --bs-table-hover-bg: var(--surface-muted);
+    --bs-table-hover-color: var(--text);
+    --bs-table-border-color: var(--border);
+    color: var(--text);
 }
 
 .table-light {
-    background-color: #f8f9fa;
+    background-color: var(--surface-muted);
 }
 
 .table th {
-    color: #1a3a6f;
+    color: var(--text);
     font-weight: 600;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: 2px solid var(--border);
 }
 
 .table td {
     vertical-align: middle;
-    color: #2c3e50;
+    color: var(--text);
 }
 
 .table-hover tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: var(--surface-muted);
     transition: background-color 0.2s;
 }
 
 .table td[colspan] {
-    color: #6c757d;
+    color: var(--text-muted);
 }
 
 /* Category Badges */
@@ -794,7 +817,7 @@ onUnmounted(() => {
 }
 
 .category-secondary {
-    background: #6c757d;
+    background: var(--text-muted);
     color: white;
 }
 
@@ -805,7 +828,7 @@ onUnmounted(() => {
 
 .category-warning {
     background: #ffc107;
-    color: #2c3e50;
+    color: var(--text);
 }
 
 .category-danger {
@@ -819,9 +842,9 @@ onUnmounted(() => {
 }
 
 .category-light {
-    background: #f8f9fa;
-    color: #2c3e50;
-    border: 1px solid #dee2e6;
+    background: var(--surface-muted);
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
 .category-muted {
@@ -851,12 +874,12 @@ onUnmounted(() => {
 .modal-content {
     border-radius: 12px;
     border: none;
-    background: white;
+    background: var(--surface);
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-bottom: 2px solid #e9ecef;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-muted) 100%);
+    border-bottom: 2px solid var(--border);
     border-radius: 12px 12px 0 0;
     padding: 1rem 1.5rem;
     display: flex;
@@ -865,7 +888,7 @@ onUnmounted(() => {
 }
 
 .modal-title {
-    color: #1a3a6f;
+    color: var(--text);
     font-weight: 600;
     margin: 0;
 }
@@ -879,7 +902,7 @@ onUnmounted(() => {
 }
 
 .close-btn:hover {
-    color: #333;
+    color: var(--text);
 }
 
 .modal-body {
@@ -896,7 +919,7 @@ onUnmounted(() => {
     gap: 0.75rem;
     padding: 1rem 1.5rem;
     border-radius: 0.5rem;
-    background: white;
+    background: var(--surface);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1100;
     animation: slideInRight 0.3s ease;

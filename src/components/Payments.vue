@@ -455,7 +455,7 @@ onMounted(fetchPayments);
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  background: #f8fafc;
+  background: var(--bg);
   min-height: 100vh;
 }
 
@@ -469,16 +469,17 @@ onMounted(fetchPayments);
 
 .page-header h1 {
   font-size: 2rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
 .refresh-icon {
+  color: var(--primary);
   display: inline-block;
   margin-right: 0.25rem;
   font-style: normal;
@@ -498,7 +499,7 @@ onMounted(fetchPayments);
 }
 
 .summary-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   display: flex;
@@ -524,7 +525,7 @@ onMounted(fetchPayments);
 
 .summary-label {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
@@ -533,7 +534,7 @@ onMounted(fetchPayments);
 .summary-value {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -566,42 +567,42 @@ onMounted(fetchPayments);
 .search-input {
   width: 100%;
   padding: 0.625rem 1rem 0.625rem 2.5rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: white;
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text);
   box-sizing: border-box;
   transition: all 0.2s;
 }
 
-.search-input::placeholder { color: #9ca3af; }
+.search-input::placeholder { color: var(--text-muted); }
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .filter-select {
   padding: 0.625rem 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: white;
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
   min-width: 150px;
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 /* Table */
 .table-wrapper {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -614,7 +615,7 @@ onMounted(fetchPayments);
 
 .results-count {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .table-scroll {
@@ -629,7 +630,7 @@ onMounted(fetchPayments);
 }
 
 .payments-table thead tr {
-  background: #f8fafc;
+  background: var(--bg);
 }
 
 .payments-table th {
@@ -637,10 +638,10 @@ onMounted(fetchPayments);
   text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--border);
   white-space: nowrap;
   user-select: none;
 }
@@ -650,7 +651,7 @@ onMounted(fetchPayments);
 }
 
 .payments-table th.sortable:hover {
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .sort-icon {
@@ -665,14 +666,14 @@ onMounted(fetchPayments);
 }
 
 .payment-row:hover {
-  background: #f8fafc;
+  background: var(--bg);
 }
 
 .payment-row td {
   padding: 1rem;
   border-bottom: 1px solid #f0f0f0;
   vertical-align: middle;
-  color: #1a1a1a;
+  color: var(--text);
   font-size: 0.875rem;
 }
 
@@ -683,12 +684,12 @@ onMounted(fetchPayments);
 /* Cell types */
 .date-cell .date-primary {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .date-cell .date-time {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   margin-top: 0.125rem;
 }
 
@@ -714,7 +715,7 @@ onMounted(fetchPayments);
 }
 
 .phone-cell {
-  color: #6b7280;
+  color: var(--text-muted);
   font-family: monospace;
   font-size: 0.8rem;
 }
@@ -723,7 +724,7 @@ onMounted(fetchPayments);
   display: inline-block;
   padding: 0.2rem 0.5rem;
   background: #eff6ff;
-  color: #3b82f6;
+  color: var(--primary);
   border-radius: 0.375rem;
   font-size: 0.75rem;
   font-family: monospace;
@@ -794,7 +795,7 @@ onMounted(fetchPayments);
 .spinner {
   width: 50px;
   height: 50px;
-  border: 3px solid #e5e7eb;
+  border: 3px solid var(--border);
   border-top-color: #00a651;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -804,7 +805,7 @@ onMounted(fetchPayments);
 .empty-state {
   text-align: center;
   padding: 4rem;
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -816,12 +817,12 @@ onMounted(fetchPayments);
 
 .empty-state h3 {
   font-size: 1.25rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #6b7280;
+  color: var(--text-muted);
   margin-bottom: 1.5rem;
   max-width: 400px;
   margin-left: auto;
@@ -841,7 +842,7 @@ onMounted(fetchPayments);
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   width: 90%;
   max-width: 520px;
@@ -855,7 +856,7 @@ onMounted(fetchPayments);
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-header.status-success { background: #ecfdf5; }
@@ -875,7 +876,7 @@ onMounted(fetchPayments);
 .modal-header h2 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
   margin: 0;
 }
 
@@ -884,12 +885,12 @@ onMounted(fetchPayments);
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--text-muted);
   transition: color 0.2s;
   line-height: 1;
 }
 
-.close-btn:hover { color: #1a1a1a; }
+.close-btn:hover { color: var(--text); }
 
 .modal-body {
   padding: 1.5rem;
@@ -922,7 +923,7 @@ onMounted(fetchPayments);
 .detail-amount {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -946,28 +947,28 @@ onMounted(fetchPayments);
 
 .detail-label {
   font-size: 0.8125rem;
-  color: #6b7280;
+  color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .detail-value {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
   text-align: right;
   word-break: break-all;
 }
 
 .receipt-value {
   font-family: monospace;
-  color: #3b82f6;
+  color: var(--primary);
   font-size: 0.875rem;
 }
 
 .mono {
   font-family: monospace;
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .error-text {
@@ -976,7 +977,7 @@ onMounted(fetchPayments);
 
 .modal-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
 }
@@ -993,23 +994,23 @@ onMounted(fetchPayments);
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
 .btn-secondary {
   background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: var(--border);
 }
 
 .btn:disabled {
@@ -1027,7 +1028,7 @@ onMounted(fetchPayments);
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
-  background: white;
+  background: var(--surface);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1100;
   animation: slideInRight 0.3s ease;
@@ -1039,7 +1040,7 @@ onMounted(fetchPayments);
 
 .toast-message {
   font-size: 0.875rem;
-  color: #1a1a1a;
+  color: var(--text);
   font-weight: 500;
 }
 

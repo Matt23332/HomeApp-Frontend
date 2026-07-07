@@ -26,7 +26,7 @@ const navigationItems = ref([
 ]);
 
 const userAvatarColor = computed(() => {
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const colors = ['var(--primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
     if (!user.value?.name) return colors[0];
     const index = user.value.name.length % colors.length;
     return colors[index];
@@ -269,14 +269,14 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.98);
+    background: var(--surface-translucent);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(59, 130, 246, 0.1);
     transition: all 0.3s ease;
 }
 
 .navbar-scrolled {
-    background: rgba(255, 255, 255, 0.98);
+    background: var(--surface-translucent);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-bottom-color: rgba(59, 130, 246, 0.2);
 }
@@ -309,7 +309,7 @@ onUnmounted(() => {
 .brand-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -325,12 +325,12 @@ onUnmounted(() => {
 .brand-text {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--text);
     letter-spacing: -0.5px;
 }
 
 .brand-highlight {
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .navbar-links {
@@ -352,7 +352,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    color: #6b7280;
+    color: var(--text-muted);
     text-decoration: none;
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -361,13 +361,13 @@ onUnmounted(() => {
 
 .nav-link:hover {
     background: rgba(59, 130, 246, 0.05);
-    color: #3b82f6;
+    color: var(--primary);
     transform: translateY(-1px);
 }
 
 .nav-link-active {
     background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    color: var(--primary);
     font-weight: 600;
 }
 
@@ -379,7 +379,7 @@ onUnmounted(() => {
     transform: translateX(-50%);
     width: 30%;
     height: 2px;
-    background: #3b82f6;
+    background: var(--primary);
     border-radius: 2px;
 }
 
@@ -428,7 +428,7 @@ onUnmounted(() => {
 
 .action-active {
     background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .action-icon {
@@ -488,19 +488,19 @@ onUnmounted(() => {
 .user-name {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text);
     display: block;
 }
 
 .user-role {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-muted);
     display: block;
 }
 
 .dropdown-arrow {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--text-muted);
     transition: transform 0.2s ease;
 }
 
@@ -516,7 +516,7 @@ onUnmounted(() => {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    background: white;
+    background: var(--surface);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     min-width: 280px;
@@ -550,18 +550,18 @@ onUnmounted(() => {
 
 .preview-name {
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text);
     margin-bottom: 0.25rem;
 }
 
 .preview-email {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-muted);
 }
 
 .dropdown-divider {
     height: 1px;
-    background: #e5e7eb;
+    background: var(--border);
     margin: 0.5rem 0;
 }
 
@@ -570,7 +570,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
-    color: #374151;
+    color: var(--text);
     text-decoration: none;
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -583,7 +583,7 @@ onUnmounted(() => {
 
 .dropdown-item:hover {
     background: rgba(59, 130, 246, 0.05);
-    color: #3b82f6;
+    color: var(--primary);
 }
 
 .logout-item {
@@ -612,20 +612,20 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border);
 }
 
 .dropdown-header h4 {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text);
     margin: 0;
 }
 
 .mark-all-btn {
     background: none;
     border: none;
-    color: #3b82f6;
+    color: var(--primary);
     font-size: 0.8rem;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
@@ -646,7 +646,7 @@ onUnmounted(() => {
 .empty-state {
     padding: 2rem;
     text-align: center;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .empty-icon {
@@ -684,29 +684,29 @@ onUnmounted(() => {
 .notification-title {
     font-weight: 600;
     font-size: 0.9rem;
-    color: #1a1a1a;
+    color: var(--text);
     margin-bottom: 0.25rem;
 }
 
 .notification-message {
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--text-muted);
     margin-bottom: 0.25rem;
 }
 
 .notification-time {
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: var(--text-muted);
 }
 
 .dropdown-footer {
     padding: 0.75rem 1rem;
     text-align: center;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--border);
 }
 
 .view-all-link {
-    color: #3b82f6;
+    color: var(--primary);
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 500;
@@ -738,7 +738,7 @@ onUnmounted(() => {
 .menu-icon span {
     display: block;
     height: 2px;
-    background: #1a1a1a;
+    background: var(--text);
     border-radius: 2px;
     transition: all 0.3s ease;
 }
@@ -783,7 +783,7 @@ onUnmounted(() => {
         width: 80%;
         max-width: 320px;
         height: 100vh;
-        background: white;
+        background: var(--surface);
         flex-direction: column;
         justify-content: flex-start;
         padding: 5rem 1rem 2rem;
@@ -812,7 +812,7 @@ onUnmounted(() => {
         width: 100%;
         margin-top: 1rem;
         padding-top: 1rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid var(--border);
     }
 
     .dropdown {

@@ -754,7 +754,7 @@ async function recheckPayment() {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  background: #f8fafc;
+  background: var(--bg);
   min-height: 100vh;
 }
 
@@ -768,12 +768,12 @@ async function recheckPayment() {
 
 .page-header h1 {
   font-size: 2rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -786,7 +786,7 @@ async function recheckPayment() {
 }
 
 .summary-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   display: flex;
@@ -811,7 +811,7 @@ async function recheckPayment() {
 
 .summary-label {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
@@ -820,7 +820,7 @@ async function recheckPayment() {
 .summary-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 /* Filters Bar */
@@ -851,41 +851,41 @@ async function recheckPayment() {
 .search-input {
   width: 100%;
   padding: 0.625rem 1rem 0.625rem 2.5rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: white;
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text);
   transition: all 0.2s;
 }
 
 .search-input::placeholder {
-  color: #9ca3af;
+  color: var(--text-muted);
   opacity: 1;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  color: #1a1a1a;
-  background: #fff;
+  color: var(--text);
+  background: var(--surface);
 }
 
 .filter-select {
   padding: 0.625rem 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: white;
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
   min-width: 150px;
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 /* Bills Grid */
@@ -896,7 +896,7 @@ async function recheckPayment() {
 }
 
 .bill-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -918,7 +918,7 @@ async function recheckPayment() {
 }
 
 .bill-card.status-soon {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--primary);
 }
 
 .bill-card.status-upcoming {
@@ -927,7 +927,7 @@ async function recheckPayment() {
 
 .bill-header {
   padding: 1.25rem;
-  background: white;
+  background: var(--surface);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -948,7 +948,7 @@ async function recheckPayment() {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .bill-actions {
@@ -987,7 +987,7 @@ async function recheckPayment() {
 .bill-amount {
   font-size: 2rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--primary);
   margin-bottom: 1rem;
 }
 
@@ -999,11 +999,11 @@ async function recheckPayment() {
 }
 
 .bill-due .label {
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .bill-due .value {
-  color: #1a1a1a;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -1028,7 +1028,7 @@ async function recheckPayment() {
 
 .status-soon {
   background: #eff6ff;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .status-upcoming {
@@ -1042,7 +1042,7 @@ async function recheckPayment() {
 
 .progress-bar {
   height: 6px;
-  background: #e5e7eb;
+  background: var(--border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 0.5rem;
@@ -1050,14 +1050,14 @@ async function recheckPayment() {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f59e0b, #3b82f6);
+  background: linear-gradient(90deg, #f59e0b, var(--primary));
   border-radius: 3px;
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.7rem;
-  color: #6b7280;
+  color: var(--text-muted);
   text-align: right;
 }
 
@@ -1095,7 +1095,7 @@ async function recheckPayment() {
   justify-content: center;
   width: 20px;
   height: 20px;
-  background: white;
+  background: var(--surface);
   color: #00a651;
   border-radius: 50%;
   font-size: 0.75rem;
@@ -1143,7 +1143,7 @@ async function recheckPayment() {
 }
 
 .mpesa-badge {
-  background: white;
+  background: var(--surface);
   color: #00a651;
   font-size: 0.625rem;
   font-weight: 900;
@@ -1164,10 +1164,10 @@ async function recheckPayment() {
   justify-content: space-between;
   align-items: center;
 }
-.mpesa-bill-name { font-weight: 600; color: #1a1a1a; }
+.mpesa-bill-name { font-weight: 600; color: var(--text); }
 .mpesa-bill-amount { font-size: 1.25rem; font-weight: 700; color: #00a651; }
  
-.mpesa-hint { font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; }
+.mpesa-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
  
 .btn-mpesa-submit {
   display: flex;
@@ -1213,12 +1213,12 @@ async function recheckPayment() {
 }
 
 .mpesa-waiting h3 {
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.75rem;
 }
 
 .mpesa-waiting p {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -1243,11 +1243,11 @@ async function recheckPayment() {
 .mpesa-result h3 {
   font-size: 1.25rem;
   margin-bottom: 0.75rem;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .mpesa-result p {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 0.5rem;
@@ -1273,8 +1273,8 @@ async function recheckPayment() {
 .spinner {
   width: 50px;
   height: 50px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -1290,7 +1290,7 @@ async function recheckPayment() {
 .empty-state {
   text-align: center;
   padding: 4rem;
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
 }
 
@@ -1301,12 +1301,12 @@ async function recheckPayment() {
 
 .empty-state h3 {
   font-size: 1.25rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #6b7280;
+  color: var(--text-muted);
   margin-bottom: 1.5rem;
 }
 
@@ -1326,7 +1326,7 @@ async function recheckPayment() {
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   width: 90%;
   max-width: 550px;
@@ -1344,13 +1344,13 @@ async function recheckPayment() {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
   margin: 0;
 }
 
@@ -1359,12 +1359,12 @@ async function recheckPayment() {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--text-muted);
   transition: color 0.2s;
 }
 
 .close-btn:hover {
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .modal-body {
@@ -1396,30 +1396,30 @@ async function recheckPayment() {
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
   padding: 0.625rem 1rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: white;
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text);
   box-sizing: border-box;
   transition: all 0.2s;
 }
 
 .form-group input::placeholder {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1443,13 +1443,13 @@ label {
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 input, select {
   width: 100%;
   padding: 0.625rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
   transition: all 0.2s;
@@ -1457,7 +1457,7 @@ input, select {
 
 input:focus, select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1481,7 +1481,7 @@ input.error, select.error {
   left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6b7280;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -1508,12 +1508,12 @@ input.error, select.error {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
@@ -1524,12 +1524,12 @@ input.error, select.error {
 
 .btn-secondary {
   background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: var(--border);
 }
 
 .btn-danger {
@@ -1551,7 +1551,7 @@ input.error, select.error {
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
-  background: white;
+  background: var(--surface);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1100;
   animation: slideInRight 0.3s ease;
@@ -1560,7 +1560,7 @@ input.error, select.error {
 
 .toast-message {
   font-size: 0.875rem;
-  color: #1a1a1a;
+  color: var(--text);
   font-weight: 500;
 }
 
