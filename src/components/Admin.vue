@@ -150,7 +150,7 @@ const getUserInitials = (name) => {
 }
 
 const getAvatarColor = (name) => {
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec489a'];
+    const colors = ['var(--primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec489a'];
     const index = (name?.length || 0) % colors.length;
     return colors[index];
 }
@@ -177,16 +177,16 @@ const getBillStatusClass = (status, dueDate) => {
 
 const getCategoryColor = (category) => {
     const colors = {
-        Bills: '#3b82f6',
+        Bills: 'var(--primary)',
         Groceries: '#10b981',
         Entertainment: '#f59e0b',
         Utilities: '#ef4444',
         Transportation: '#8b5cf6',
         Healthcare: '#ec489a',
         Shopping: '#14b8a6',
-        Other: '#6b7280',  
+        Other: 'var(--text-muted)',  
     }
-    return colors[category] || '#6b7280';
+    return colors[category] || 'var(--text-muted)';
 }
 
 const showToast = (message, type = 'success') => {
@@ -390,7 +390,7 @@ const updateCharts = () => {
                 datasets: [{
                     label: 'Amount',
                     data: reportData.value.categoryBreakdown?.map(c => c.total) || [],
-                    backgroundColor: '#3b82f6',
+                    backgroundColor: 'var(--primary)',
                     borderRadius: 8
                 }]
             },
@@ -910,7 +910,7 @@ onMounted(() => {
 <style scoped>
 .admin-dashboard {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg);
   padding: 24px;
 }
 
@@ -927,7 +927,7 @@ onMounted(() => {
 .header-left h1 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   margin-bottom: 4px;
 }
 
@@ -947,7 +947,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
   border: 1px solid #e2e8f0;
 }
@@ -957,7 +957,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   cursor: pointer;
@@ -965,7 +965,7 @@ onMounted(() => {
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #f1f5f9;
+  background: var(--surface-muted);
 }
 
 .refresh-btn:disabled {
@@ -982,7 +982,7 @@ onMounted(() => {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   padding: 20px;
   display: flex;
@@ -1007,7 +1007,7 @@ onMounted(() => {
 .stat-value {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   line-height: 1;
   margin-bottom: 4px;
 }
@@ -1036,7 +1036,7 @@ onMounted(() => {
 .admin-tabs {
   display: flex;
   gap: 8px;
-  background: white;
+  background: var(--surface);
   padding: 6px;
   border-radius: 14px;
   margin-bottom: 24px;
@@ -1062,12 +1062,12 @@ onMounted(() => {
 }
 
 .tab-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-muted);
+  color: var(--text);
 }
 
 .tab-btn.active {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
@@ -1096,7 +1096,7 @@ onMounted(() => {
 .panel-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .panel-actions {
@@ -1120,7 +1120,7 @@ onMounted(() => {
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1128,13 +1128,13 @@ onMounted(() => {
   padding: 10px 16px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: white;
+  background: var(--surface);
   cursor: pointer;
 }
 
 /* Table */
 .table-container {
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   overflow-x: auto;
   border: 1px solid #e2e8f0;
@@ -1148,7 +1148,7 @@ onMounted(() => {
 .data-table thead th {
   text-align: left;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--bg);
   font-size: 0.75rem;
   font-weight: 600;
   color: #64748b;
@@ -1160,12 +1160,12 @@ onMounted(() => {
 .data-table tbody td {
   padding: 14px 16px;
   font-size: 0.875rem;
-  color: #0f172a;
-  border-bottom: 1px solid #f1f5f9;
+  color: var(--text);
+  border-bottom: 1px solid var(--surface-muted);
 }
 
 .data-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--bg);
 }
 
 /* User Cell */
@@ -1201,7 +1201,7 @@ onMounted(() => {
 }
 
 .role-admin {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
@@ -1245,7 +1245,7 @@ onMounted(() => {
 
 .amount-cell {
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 /* Actions */
@@ -1265,7 +1265,7 @@ onMounted(() => {
 }
 
 .icon-btn:hover {
-  background: #f1f5f9;
+  background: var(--surface-muted);
 }
 
 .icon-btn.danger:hover {
@@ -1275,7 +1275,7 @@ onMounted(() => {
 
 /* Buttons */
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1286,7 +1286,7 @@ onMounted(() => {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
@@ -1296,7 +1296,7 @@ onMounted(() => {
 }
 
 .btn-secondary {
-  background: #f1f5f9;
+  background: var(--surface-muted);
   color: #475569;
   border: 1px solid #e2e8f0;
   padding: 10px 20px;
@@ -1332,7 +1332,7 @@ onMounted(() => {
 }
 
 .report-filters {
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: 16px;
   display: flex;
@@ -1369,7 +1369,7 @@ onMounted(() => {
 }
 
 .summary-item {
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: 16px;
   text-align: center;
@@ -1386,7 +1386,7 @@ onMounted(() => {
 .summary-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .charts-grid {
@@ -1396,7 +1396,7 @@ onMounted(() => {
 }
 
 .chart-card {
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
@@ -1409,7 +1409,7 @@ onMounted(() => {
 }
 
 .data-card {
-  background: white;
+  background: var(--surface);
   padding: 20px;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
@@ -1436,7 +1436,7 @@ onMounted(() => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   width: 90%;
   max-width: 500px;
@@ -1486,7 +1486,7 @@ onMounted(() => {
   margin-bottom: 6px;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .form-group input,
@@ -1501,7 +1501,7 @@ onMounted(() => {
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 .modal-actions {
@@ -1557,14 +1557,14 @@ onMounted(() => {
 .stat-box {
   text-align: center;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--bg);
   border-radius: 12px;
 }
 
 .stat-number {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 /* Toast */
@@ -1576,7 +1576,7 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   padding: 12px 20px;
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1100;

@@ -213,7 +213,7 @@ const initExpenseChart = () => {
       labels: chartLabels,
       datasets: [{
         data: chartData,
-        backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff', '#e0e7ff', '#c7d2fe'],
+        backgroundColor: ['var(--primary)', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff', '#e0e7ff', '#c7d2fe'],
         borderWidth: 0,
         borderRadius: 8,
         spacing: 2
@@ -569,7 +569,7 @@ onUnmounted(() => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  background: #f8fafc;
+  background: var(--bg);
   min-height: 100vh;
 }
 
@@ -580,7 +580,7 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding: 2rem;
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -588,20 +588,20 @@ onUnmounted(() => {
 .welcome-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .user-name {
-  color: #3b82f6;
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .welcome-subtitle {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -610,7 +610,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: #f8fafc;
+  background: var(--bg);
   border-radius: 1rem;
 }
 
@@ -625,13 +625,13 @@ onUnmounted(() => {
 .date-day {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
   line-height: 1;
 }
 
 .date-month {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 0.25rem;
 }
 
@@ -644,7 +644,7 @@ onUnmounted(() => {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   transition: all 0.3s ease;
@@ -660,7 +660,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  background: linear-gradient(90deg, var(--primary), #60a5fa);
 }
 
 .stat-card:hover {
@@ -680,7 +680,7 @@ onUnmounted(() => {
 }
 
 .stat-label {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -688,7 +688,7 @@ onUnmounted(() => {
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
@@ -730,7 +730,7 @@ onUnmounted(() => {
 .transactions-card,
 .bills-card,
 .shopping-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -746,11 +746,11 @@ onUnmounted(() => {
 .card-header h3 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .view-all-link {
-  color: #3b82f6;
+  color: var(--primary);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -758,16 +758,16 @@ onUnmounted(() => {
 }
 
 .view-all-link:hover {
-  color: #2563eb;
+  color: var(--primary-hover);
 }
 
 .period-select {
   padding: 0.375rem 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  color: #374151;
-  background: white;
+  color: var(--text);
+  background: var(--surface);
   cursor: pointer;
 }
 
@@ -793,7 +793,7 @@ onUnmounted(() => {
 }
 
 .transaction-item:hover {
-  background: #f9fafb;
+  background: var(--surface-muted);
 }
 
 .transaction-icon {
@@ -812,13 +812,13 @@ onUnmounted(() => {
 
 .transaction-title {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 
 .transaction-date {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .transaction-amount {
@@ -847,7 +847,7 @@ onUnmounted(() => {
   gap: 1rem;
   padding: 1rem;
   border-radius: 0.5rem;
-  background: #f9fafb;
+  background: var(--surface-muted);
 }
 
 .bill-info {
@@ -856,18 +856,18 @@ onUnmounted(() => {
 
 .bill-name {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 
 .bill-due {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .bill-amount {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .bill-status {
@@ -913,7 +913,7 @@ onUnmounted(() => {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #3b82f6;
+  accent-color: var(--primary);
 }
 
 .shopping-info {
@@ -922,31 +922,31 @@ onUnmounted(() => {
 
 .shopping-name {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 
 .shopping-name.purchased {
   text-decoration: line-through;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .shopping-category {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .shopping-price {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 /* Empty State */
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .empty-state span {
@@ -961,7 +961,7 @@ onUnmounted(() => {
 }
 
 .add-link {
-  color: #3b82f6;
+  color: var(--primary);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -969,7 +969,7 @@ onUnmounted(() => {
 
 /* Budget Section */
 .budget-section {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -985,7 +985,7 @@ onUnmounted(() => {
 .budget-item {
   padding: 1rem;
   border-radius: 0.5rem;
-  background: #f9fafb;
+  background: var(--surface-muted);
 }
 
 .budget-header {
@@ -996,17 +996,17 @@ onUnmounted(() => {
 
 .budget-category {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .budget-amount {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .progress-bar {
   height: 8px;
-  background: #e5e7eb;
+  background: var(--border);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 0.5rem;
@@ -1047,22 +1047,22 @@ onUnmounted(() => {
   flex: 1;
   min-width: 150px;
   padding: 1rem;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .action-btn:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
@@ -1074,17 +1074,17 @@ onUnmounted(() => {
 .adjust-budget-btn {
   padding: 0.375rem 0.75rem;
   background: transparent;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .adjust-budget-btn:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 /* Modal */
@@ -1103,7 +1103,7 @@ onUnmounted(() => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   width: 90%;
   max-width: 500px;
@@ -1117,13 +1117,13 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .close-btn {
@@ -1131,12 +1131,12 @@ onUnmounted(() => {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--text-muted);
   transition: color 0.2s;
 }
 
 .close-btn:hover {
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .modal form {
@@ -1152,14 +1152,14 @@ onUnmounted(() => {
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text);
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
   padding: 0.625rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
   transition: border-color 0.2s;
@@ -1168,7 +1168,7 @@ onUnmounted(() => {
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 .modal-actions {
@@ -1188,24 +1188,24 @@ onUnmounted(() => {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   border: none;
 }
 
 .btn-primary:hover {
-  background: #2563eb;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: white;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background: #f9fafb;
+  background: var(--surface-muted);
   border-color: #d1d5db;
 }
 
@@ -1238,7 +1238,7 @@ onUnmounted(() => {
   align-items: center;
   height: 100vh;
   font-size: 1.25rem;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .loading {
@@ -1253,8 +1253,8 @@ onUnmounted(() => {
 .spinner {
   width: 50px;
   height: 50px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

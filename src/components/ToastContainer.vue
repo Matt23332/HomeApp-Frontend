@@ -36,8 +36,8 @@ const icons = { success: '✅', info: 'ℹ️', warning: '⚠️', error: '❌' 
   display: flex;
   align-items: center;
   gap: 10px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 12px 14px;
   min-width: 300px;
@@ -57,7 +57,7 @@ const icons = { success: '✅', info: 'ℹ️', warning: '⚠️', error: '❌' 
 }
 
 .toast-info {
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid var(--primary);
 }
 
 .toast-icon {
@@ -71,26 +71,26 @@ const icons = { success: '✅', info: 'ℹ️', warning: '⚠️', error: '❌' 
 .toast-body p {
     font-size: 13px;
     font-weight: 500;
-    color: #1a1a1a;
+    color: var(--text);
     margin: 0;
 }
 
 .toast-body span {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--text-muted);
 }
 
 .toast-close {
     background: none;
     border: none;
-    color: #9ca3af;
+    color: var(--text-muted);
     cursor: pointer;
     font-size: 13px;
     padding: 2px;
 }
 
 .toast-close:hover {
-    color: #374151;
+    color: var(--text);
 }
 
 .toast-enter-active {

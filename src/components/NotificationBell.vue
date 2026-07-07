@@ -59,8 +59,8 @@ const iconBgMap = {
 <style scoped>
 .bell-btn {
   position: relative;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   width: 40px;
   height: 40px;
@@ -71,12 +71,12 @@ const iconBgMap = {
   justify-content: center;
   transition: border-color 0.2s;
 }
-.bell-btn:hover { border-color: #3b82f6; }
+.bell-btn:hover { border-color: var(--primary); }
 
 .badge {
   position: absolute;
   top: 4px; right: 4px;
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -92,8 +92,8 @@ const iconBgMap = {
   position: absolute;
   top: 48px; right: 0;
   width: 320px;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
   z-index: 1000;
@@ -105,18 +105,18 @@ const iconBgMap = {
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
-.dd-header span { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.dd-header span { font-size: 14px; font-weight: 600; color: var(--text); }
 
 .mark-read-btn {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--primary);
   font-size: 12px;
   cursor: pointer;
 }
-.mark-read-btn:hover { color: #2563eb; }
+.mark-read-btn:hover { color: var(--primary-hover); }
 
 .notif-list { max-height: 360px; overflow-y: auto; }
 
@@ -130,7 +130,7 @@ const iconBgMap = {
   transition: background 0.15s;
 }
 .notif-item:last-child { border-bottom: none; }
-.notif-item:hover { background: #f9fafb; }
+.notif-item:hover { background: var(--surface-muted); }
 .notif-item.unread { background: #eff6ff; }
 .notif-item.unread:hover { background: #dbeafe; }
 
@@ -145,16 +145,16 @@ const iconBgMap = {
 }
 
 .notif-body { flex: 1; }
-.notif-body p { font-size: 13px; color: #1a1a1a; line-height: 1.4; margin: 0 0 2px; }
-.notif-body span { font-size: 11px; color: #9ca3af; }
+.notif-body p { font-size: 13px; color: var(--text); line-height: 1.4; margin: 0 0 2px; }
+.notif-body span { font-size: 11px; color: var(--text-muted); }
 
 .unread-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--primary);
   flex-shrink: 0;
   margin-top: 4px;
 }
 
-.empty { padding: 2rem; text-align: center; color: #9ca3af; font-size: 13px; }
+.empty { padding: 2rem; text-align: center; color: var(--text-muted); font-size: 13px; }
 </style>

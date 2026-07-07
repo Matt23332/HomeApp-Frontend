@@ -21,7 +21,7 @@ let barChart = null;
 let doughnutChart = null;
 
 const CATEGORY_COLORS = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+  'var(--primary)', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
   '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
 ];
 
@@ -368,7 +368,7 @@ onBeforeUnmount(destroyCharts);
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-  background: #f8fafc;
+  background: var(--bg);
   min-height: 100vh;
 }
 
@@ -378,18 +378,18 @@ onBeforeUnmount(destroyCharts);
 
 .page-header h1 {
   font-size: 2rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
 /* Filter card */
 .filter-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.5rem;
@@ -412,24 +412,24 @@ onBeforeUnmount(destroyCharts);
 .filter-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .date-input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  color: #1a1a1a;
-  background: white;
+  color: var(--text);
+  background: var(--surface);
   transition: border-color 0.2s;
 }
 
 .date-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -449,7 +449,7 @@ onBeforeUnmount(destroyCharts);
 }
 
 .summary-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.25rem;
   display: flex;
@@ -471,7 +471,7 @@ onBeforeUnmount(destroyCharts);
 
 .summary-label {
   font-size: 0.7rem;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.25rem;
@@ -480,7 +480,7 @@ onBeforeUnmount(destroyCharts);
 .summary-value {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .period-value {
@@ -497,7 +497,7 @@ onBeforeUnmount(destroyCharts);
 }
 
 .chart-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -506,7 +506,7 @@ onBeforeUnmount(destroyCharts);
 .chart-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 1rem;
 }
 
@@ -517,7 +517,7 @@ onBeforeUnmount(destroyCharts);
 
 /* Tables */
 .table-card {
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -537,7 +537,7 @@ onBeforeUnmount(destroyCharts);
 .card-header h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .data-table {
@@ -551,17 +551,17 @@ onBeforeUnmount(destroyCharts);
   padding: 0.625rem 0.75rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border);
 }
 
 .data-table td {
   padding: 0.75rem;
   border-bottom: 1px solid #f3f4f6;
-  color: #374151;
+  color: var(--text);
   vertical-align: middle;
 }
 
@@ -570,7 +570,7 @@ onBeforeUnmount(destroyCharts);
 }
 
 .data-table tbody tr:hover td {
-  background: #f9fafb;
+  background: var(--surface-muted);
 }
 
 .text-right {
@@ -579,13 +579,13 @@ onBeforeUnmount(destroyCharts);
 
 .date-cell {
   white-space: nowrap;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
 .amount-cell {
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .category-dot {
@@ -604,13 +604,13 @@ onBeforeUnmount(destroyCharts);
   font-size: 0.7rem;
   font-weight: 600;
   background: #eff6ff;
-  color: #3b82f6;
+  color: var(--primary);
 }
 
 .table-empty {
   text-align: center;
   padding: 2rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -631,18 +631,18 @@ onBeforeUnmount(destroyCharts);
 
 .search-input {
   padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background: white;
-  color: #1a1a1a;
+  background: var(--surface);
+  color: var(--text);
   transition: border-color 0.2s;
   min-width: 220px;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -651,7 +651,7 @@ onBeforeUnmount(destroyCharts);
 .empty-state {
   text-align: center;
   padding: 5rem 2rem;
-  background: white;
+  background: var(--surface);
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -659,8 +659,8 @@ onBeforeUnmount(destroyCharts);
 .spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -673,12 +673,12 @@ onBeforeUnmount(destroyCharts);
 
 .empty-state h3 {
   font-size: 1.25rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -694,12 +694,12 @@ onBeforeUnmount(destroyCharts);
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: var(--primary);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--primary-hover);
   transform: translateY(-1px);
 }
 
@@ -710,12 +710,12 @@ onBeforeUnmount(destroyCharts);
 
 .btn-secondary {
   background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: var(--border);
 }
 
 .btn-secondary:disabled {
@@ -733,7 +733,7 @@ onBeforeUnmount(destroyCharts);
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   border-radius: 0.5rem;
-  background: white;
+  background: var(--surface);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1100;
   animation: slideInRight 0.3s ease;
@@ -744,7 +744,7 @@ onBeforeUnmount(destroyCharts);
 .toast.error   { border-left: 4px solid #ef4444; }
 
 .toast-icon   { font-size: 1.2rem; }
-.toast-message { font-size: 0.875rem; color: #1a1a1a; font-weight: 500; }
+.toast-message { font-size: 0.875rem; color: var(--text); font-weight: 500; }
 
 @keyframes spin {
   to { transform: rotate(360deg); }

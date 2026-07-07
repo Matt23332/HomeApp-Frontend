@@ -67,29 +67,29 @@ onMounted(() => {
 .page-header h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text);
   margin-bottom: 0.25rem;
 }
 
 .page-header p {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .mark-all-btn {
   background: none;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  color: #3b82f6;
+  color: var(--primary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .mark-all-btn:hover {
   background: #eff6ff;
-  border-color: #3b82f6;
+  border-color: var(--primary);
 }
 
 .notifications-list {
@@ -103,15 +103,15 @@ onMounted(() => {
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .notification-item:hover {
-  border-color: #3b82f6;
+  border-color: var(--primary);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
 }
 
@@ -127,25 +127,25 @@ onMounted(() => {
 .notif-title {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--text);
   margin: 0 0 0.25rem;
 }
 
 .notif-message {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0 0 0.25rem;
 }
 
 .notif-time {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .unread-dot {
   width: 8px;
   height: 8px;
-  background: #3b82f6;
+  background: var(--primary);
   border-radius: 50%;
   flex-shrink: 0;
   margin-top: 6px;
@@ -154,7 +154,7 @@ onMounted(() => {
 .empty-state {
   text-align: center;
   padding: 4rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .empty-state span { font-size: 3rem; display: block; margin-bottom: 1rem; }
